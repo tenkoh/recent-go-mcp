@@ -29,33 +29,47 @@ echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "go
 
 ## Architecture
 
+This project follows clean architecture principles with dependency injection for improved testability and maintainability.
+
 ### Core Components
 
-- **main.go**: MCP server implementation with tool handlers
-- **types.go**: Data structures for Go releases and updates
-- **data.go**: Data loading, version comparison, and filtering logic
+- **main.go**: MCP server implementation with dependency injection and embedded data
+- **internal/domain/**: Domain models and interfaces defining contracts
+- **internal/service/**: Business logic layer with feature retrieval and formatting
+- **internal/storage/**: Data access layer with embedded repository implementation
+- **internal/version/**: Version comparison utilities with comprehensive testing
 - **data/releases/**: Individual JSON files for each Go version (embedded via go:embed)
 
 ### Key Design Patterns
 
-- **Embedded Data**: Uses `//go:embed` to include JSON data in the binary
+- **Clean Architecture**: Clear separation of concerns with domain, service, and infrastructure layers
+- **Dependency Injection**: All dependencies injected through interfaces for testability
+- **Repository Pattern**: Abstract data access through ReleaseRepository interface
+- **Embedded Data**: Uses `//go:embed` in main.go to include JSON data in the binary
 - **MCP Protocol**: Implements Model Context Protocol for LLM integration
-- **Version Comparison**: Smart semantic version comparison for Go releases
-- **Filtering**: Package-specific filtering for targeted updates
+- **SOLID Principles**: Single responsibility, dependency inversion, and open/closed principles
 
 ### Adding New Go Versions
 
 1. Create a new JSON file in `data/releases/` following the pattern `go{version}.json`
-2. Add the embed directive in `data.go` (e.g., `//go:embed data/releases/go1.24.json`)
-3. Update the `releaseFiles` map in `data.go` init function
+2. The embedded repository automatically discovers and loads all `.json` files in the releases directory
+3. No code changes required - the system dynamically loads new versions
 4. Follow the existing JSON structure with version, changes, and package updates
-5. The `init()` function automatically loads and sorts all releases
+5. Version sorting and comparison handled automatically by the version comparator
+
+### Testing
+
+- **Unit Tests**: Comprehensive test coverage for business logic using mocks
+- **Version Comparator**: Fully tested semantic version comparison
+- **Service Layer**: Testable business logic with dependency injection
+- **Repository Pattern**: Mockable data access for isolated testing
 
 ### Data Structure
 
-- Releases are sorted by version (newest first)
+- Releases are automatically sorted by semantic version (newest first)
 - Each release contains general changes and package-specific updates
 - Changes are categorized by impact: "new", "enhancement", "performance", "breaking", "deprecation"
+- Version comparison uses proper semantic versioning logic
 
 ### MCP Integration
 
