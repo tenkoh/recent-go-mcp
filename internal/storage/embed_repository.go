@@ -12,7 +12,7 @@ import (
 
 // EmbeddedReleaseRepository implements ReleaseRepository using embedded JSON files
 type EmbeddedReleaseRepository struct {
-	releases   []domain.GoRelease
+	releases   []*domain.GoRelease
 	comparator domain.VersionComparator
 	fs         embed.FS
 }
@@ -39,7 +39,7 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 		return fmt.Errorf("failed to read embedded release directory: %w", err)
 	}
 	
-	r.releases = make([]domain.GoRelease, 0, len(entries))
+	r.releases = make([]*domain.GoRelease, 0, len(entries))
 	
 	for _, entry := range entries {
 		if !entry.IsDir() && path.Ext(entry.Name()) == ".json" {
@@ -55,7 +55,7 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 				return fmt.Errorf("failed to unmarshal release data from %s: %w", filePath, err)
 			}
 			
-			r.releases = append(r.releases, release)
+			r.releases = append(r.releases, &release)
 		}
 	}
 	
@@ -72,9 +72,10 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 }
 
 // GetAllReleases returns all available Go releases
-func (r *EmbeddedReleaseRepository) GetAllReleases() ([]domain.GoRelease, error) {
-	// Return a copy to prevent external modification
-	releases := make([]domain.GoRelease, len(r.releases))
+func (r *EmbeddedReleaseRepository) GetAllReleases() ([]*domain.GoRelease, error) {
+	// Return a copy of the slice (but pointers to the same data)
+	// Callers should treat returned data as read-only
+	releases := make([]*domain.GoRelease, len(r.releases))
 	copy(releases, r.releases)
 	return releases, nil
 }
@@ -83,22 +84,22 @@ func (r *EmbeddedReleaseRepository) GetAllReleases() ([]domain.GoRelease, error)
 func (r *EmbeddedReleaseRepository) GetReleaseByVersion(version string) (*domain.GoRelease, error) {
 	for _, release := range r.releases {
 		if release.Version == version {
-			// Return a copy to prevent external modification
-			releaseCopy := release
-			return &releaseCopy, nil
+			// Return pointer to the existing data
+			// Caller should treat returned data as read-only
+			return release, nil
 		}
 	}
 	return nil, fmt.Errorf("release not found for version %s", version)
 }
 
 // GetReleasesUpToVersion returns all releases from oldest up to the specified version
-func (r *EmbeddedReleaseRepository) GetReleasesUpToVersion(targetVersion string) ([]domain.GoRelease, error) {
+func (r *EmbeddedReleaseRepository) GetReleasesUpToVersion(targetVersion string) ([]*domain.GoRelease, error) {
 	// First, verify the target version exists
 	if _, err := r.GetReleaseByVersion(targetVersion); err != nil {
 		return nil, err
 	}
 	
-	var result []domain.GoRelease
+	var result []*domain.GoRelease
 	
 	// Collect all releases up to and including the target version
 	for _, release := range r.releases {

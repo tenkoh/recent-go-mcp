@@ -3,13 +3,16 @@ package domain
 // ReleaseRepository handles access to Go release data
 type ReleaseRepository interface {
 	// GetAllReleases returns all available Go releases
-	GetAllReleases() ([]GoRelease, error)
+	// Note: Returned pointers should be treated as read-only to maintain data integrity
+	GetAllReleases() ([]*GoRelease, error)
 	
 	// GetReleaseByVersion returns a specific release by version
+	// Note: Returned pointer should be treated as read-only to maintain data integrity
 	GetReleaseByVersion(version string) (*GoRelease, error)
 	
 	// GetReleasesUpToVersion returns all releases from oldest up to the specified version
-	GetReleasesUpToVersion(targetVersion string) ([]GoRelease, error)
+	// Note: Returned pointers should be treated as read-only to maintain data integrity
+	GetReleasesUpToVersion(targetVersion string) ([]*GoRelease, error)
 	
 	// GetOldestVersion returns the oldest available version
 	GetOldestVersion() (string, error)

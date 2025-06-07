@@ -10,24 +10,24 @@ import (
 
 // mockRepository implements domain.ReleaseRepository for testing
 type mockRepository struct {
-	releases []domain.GoRelease
+	releases []*domain.GoRelease
 }
 
-func (m *mockRepository) GetAllReleases() ([]domain.GoRelease, error) {
+func (m *mockRepository) GetAllReleases() ([]*domain.GoRelease, error) {
 	return m.releases, nil
 }
 
 func (m *mockRepository) GetReleaseByVersion(version string) (*domain.GoRelease, error) {
 	for _, release := range m.releases {
 		if release.Version == version {
-			return &release, nil
+			return release, nil
 		}
 	}
 	return nil, fmt.Errorf("version not found: %s", version)
 }
 
-func (m *mockRepository) GetReleasesUpToVersion(targetVersion string) ([]domain.GoRelease, error) {
-	var result []domain.GoRelease
+func (m *mockRepository) GetReleasesUpToVersion(targetVersion string) ([]*domain.GoRelease, error) {
+	var result []*domain.GoRelease
 	for _, release := range m.releases {
 		if release.Version <= targetVersion { // Simple string comparison for testing
 			result = append(result, release)
@@ -65,8 +65,8 @@ func (c *mockComparator) Compare(v1, v2 string) int {
 
 func TestDefaultFeatureService_GetFeaturesForVersion(t *testing.T) {
 	// Setup test data
-	testReleases := []domain.GoRelease{
-		{
+	testReleases := []*domain.GoRelease{
+		&domain.GoRelease{
 			Version:     "1.21",
 			ReleaseDate: time.Date(2023, 8, 8, 0, 0, 0, 0, time.UTC),
 			Summary:     "Go 1.21 release",
@@ -87,7 +87,7 @@ func TestDefaultFeatureService_GetFeaturesForVersion(t *testing.T) {
 				},
 			},
 		},
-		{
+		&domain.GoRelease{
 			Version:     "1.22",
 			ReleaseDate: time.Date(2024, 2, 6, 0, 0, 0, 0, time.UTC),
 			Summary:     "Go 1.22 release",
