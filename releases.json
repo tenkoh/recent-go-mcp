@@ -464,65 +464,279 @@
   {
     "version": "1.21",
     "release_date": "2023-08-08T00:00:00Z",
-    "summary": "Go 1.21 introduces built-in functions for common operations, WebAssembly improvements, and enhanced tooling.",
+    "summary": "Go 1.21 introduces revolutionary built-in functions, comprehensive slice/map packages, structured logging, WebAssembly improvements, and production-ready PGO.",
     "changes": [
       {
         "category": "language",
-        "description": "New built-in functions: min, max, and clear",
+        "description": "Three new built-in functions: min, max, and clear for common operations",
+        "impact": "new"
+      },
+      {
+        "category": "language",
+        "description": "Enhanced type inference for generics with better type argument inference",
+        "impact": "enhancement"
+      },
+      {
+        "category": "runtime",
+        "description": "Profile-guided optimization (PGO) is now production-ready with significant performance gains",
+        "impact": "performance"
+      },
+      {
+        "category": "runtime",
+        "description": "Garbage collection improvements potentially reducing tail latency by up to 40%",
+        "impact": "performance"
+      },
+      {
+        "category": "runtime",
+        "description": "WebAssembly System Interface (WASI) Preview 1 support (experimental)",
         "impact": "new"
       },
       {
         "category": "runtime",
-        "description": "WebAssembly System Interface (WASI) support",
+        "description": "New go:wasmimport directive for importing WebAssembly host functions",
         "impact": "new"
       },
       {
         "category": "toolchain",
-        "description": "go test -c flag improvements and better test caching",
-        "impact": "enhancement"
+        "description": "Build speed improvements up to 6% faster compilation",
+        "impact": "performance"
+      },
+      {
+        "category": "platform",
+        "description": "Minimum OS requirements updated: macOS 10.15+, Windows 10/Server 2016+",
+        "impact": "breaking"
       }
     ],
     "packages": {
       "builtin": [
         {
           "function": "min",
-          "description": "Returns the minimum of comparable values",
+          "description": "Returns the minimum value among comparable arguments (variadic)",
           "impact": "new",
-          "example": "min(1, 2, 3) // returns 1"
+          "example": "min(1, 2, 3) // returns 1\nmin(\"apple\", \"banana\") // returns \"apple\""
         },
         {
           "function": "max",
-          "description": "Returns the maximum of comparable values",
+          "description": "Returns the maximum value among comparable arguments (variadic)",
           "impact": "new",
-          "example": "max(1, 2, 3) // returns 3"
+          "example": "max(1, 2, 3) // returns 3\nmax(\"apple\", \"banana\") // returns \"banana\""
         },
         {
           "function": "clear",
-          "description": "Clears maps and slices efficiently",
+          "description": "Deletes all elements from maps or zeroes all elements of slices",
           "impact": "new",
-          "example": "clear(myMap) // empties the map"
+          "example": "clear(myMap) // deletes all map entries\nclear(mySlice) // zeros all slice elements but keeps length"
         }
       ],
       "slices": [
         {
-          "description": "New package for slice operations",
+          "function": "Sort",
+          "description": "New package providing comprehensive slice operations - sorts slice in ascending order",
           "impact": "new",
-          "example": "slices.Sort(mySlice)"
+          "example": "slices.Sort([]int{3, 1, 2}) // [1, 2, 3]"
+        },
+        {
+          "function": "SortFunc",
+          "description": "Sorts slice with custom comparison function",
+          "impact": "new",
+          "example": "slices.SortFunc(slice, func(a, b T) int { return cmp.Compare(a, b) })"
+        },
+        {
+          "function": "BinarySearch",
+          "description": "Searches for target in sorted slice using binary search",
+          "impact": "new",
+          "example": "idx, found := slices.BinarySearch(sortedSlice, target)"
+        },
+        {
+          "function": "Contains",
+          "description": "Reports whether value is present in slice",
+          "impact": "new",
+          "example": "if slices.Contains(slice, value) { ... }"
+        },
+        {
+          "function": "Index",
+          "description": "Returns first index of value in slice, -1 if not found",
+          "impact": "new",
+          "example": "idx := slices.Index(slice, value)"
+        },
+        {
+          "function": "Equal",
+          "description": "Reports whether two slices are equal (same length and elements)",
+          "impact": "new",
+          "example": "if slices.Equal(slice1, slice2) { ... }"
+        },
+        {
+          "function": "Compare",
+          "description": "Compares two slices lexicographically",
+          "impact": "new",
+          "example": "result := slices.Compare(slice1, slice2) // -1, 0, or 1"
+        },
+        {
+          "function": "Clone",
+          "description": "Returns shallow copy of slice",
+          "impact": "new",
+          "example": "copy := slices.Clone(original)"
+        },
+        {
+          "function": "Compact",
+          "description": "Removes consecutive duplicate elements",
+          "impact": "new",
+          "example": "unique := slices.Compact([]int{1, 1, 2, 3, 3}) // [1, 2, 3]"
+        },
+        {
+          "function": "Delete",
+          "description": "Removes elements from slice by index range",
+          "impact": "new",
+          "example": "result := slices.Delete(slice, 2, 4) // removes elements [2:4]"
+        },
+        {
+          "function": "Insert",
+          "description": "Inserts values at specified index",
+          "impact": "new",
+          "example": "result := slices.Insert(slice, 2, values...)"
+        },
+        {
+          "function": "Replace",
+          "description": "Replaces elements in range with new values",
+          "impact": "new",
+          "example": "result := slices.Replace(slice, 1, 3, newValues...)"
+        },
+        {
+          "function": "Reverse",
+          "description": "Reverses elements of slice in place",
+          "impact": "new",
+          "example": "slices.Reverse(slice)"
         }
       ],
       "maps": [
         {
-          "description": "New package for map operations",
+          "function": "Clone",
+          "description": "New package for map operations - creates shallow copy of map",
           "impact": "new",
-          "example": "maps.Equal(map1, map2)"
+          "example": "newMap := maps.Clone(originalMap)"
+        },
+        {
+          "function": "Copy",
+          "description": "Copies key-value pairs from source to destination map",
+          "impact": "new",
+          "example": "maps.Copy(dst, src) // copies src entries to dst"
+        },
+        {
+          "function": "DeleteFunc",
+          "description": "Deletes map entries where function returns true",
+          "impact": "new",
+          "example": "maps.DeleteFunc(m, func(k, v) bool { return v < 0 })"
+        },
+        {
+          "function": "Equal",
+          "description": "Reports whether two maps have same key-value pairs",
+          "impact": "new",
+          "example": "if maps.Equal(map1, map2) { ... }"
+        },
+        {
+          "function": "EqualFunc",
+          "description": "Compares maps using custom equality function for values",
+          "impact": "new",
+          "example": "maps.EqualFunc(m1, m2, func(v1, v2 Type) bool { ... })"
+        }
+      ],
+      "cmp": [
+        {
+          "function": "Compare",
+          "description": "New package for comparison utilities - compares two ordered values",
+          "impact": "new",
+          "example": "result := cmp.Compare(a, b) // returns -1, 0, or 1"
+        },
+        {
+          "function": "Less",
+          "description": "Reports whether x is less than y",
+          "impact": "new",
+          "example": "if cmp.Less(x, y) { ... }"
+        },
+        {
+          "description": "Ordered type constraint for comparable types",
+          "impact": "new",
+          "example": "func Min[T cmp.Ordered](a, b T) T { ... }"
+        }
+      ],
+      "log/slog": [
+        {
+          "description": "New structured logging package with levels and key-value pairs",
+          "impact": "new",
+          "example": "slog.Info(\"user login\", \"user\", \"alice\", \"duration\", time.Since(start))"
+        },
+        {
+          "function": "Debug",
+          "description": "Logs debug level message with optional key-value pairs",
+          "impact": "new",
+          "example": "slog.Debug(\"processing request\", \"id\", requestID)"
+        },
+        {
+          "function": "Info",
+          "description": "Logs info level message with optional key-value pairs",
+          "impact": "new",
+          "example": "slog.Info(\"server started\", \"port\", 8080)"
+        },
+        {
+          "function": "Warn",
+          "description": "Logs warning level message with optional key-value pairs",
+          "impact": "new",
+          "example": "slog.Warn(\"deprecated API used\", \"endpoint\", \"/old-api\")"
+        },
+        {
+          "function": "Error",
+          "description": "Logs error level message with optional key-value pairs",
+          "impact": "new",
+          "example": "slog.Error(\"database connection failed\", \"error\", err)"
+        },
+        {
+          "function": "With",
+          "description": "Returns logger with additional key-value pairs for context",
+          "impact": "new",
+          "example": "logger := slog.With(\"component\", \"auth\")"
+        }
+      ],
+      "testing/slogtest": [
+        {
+          "description": "New package for validating slog.Handler implementations",
+          "impact": "new",
+          "example": "// Provides test utilities for structured logging handlers"
         }
       ],
       "context": [
         {
           "function": "WithDeadlineCause",
-          "description": "Creates context with deadline and cancellation cause",
+          "description": "Creates context with deadline and cancellation cause for better error tracking",
           "impact": "new",
-          "example": "ctx, cancel := context.WithDeadlineCause(parent, deadline, cause)"
+          "example": "ctx, cancel := context.WithDeadlineCause(parent, deadline, errors.New(\"timeout reason\"))"
+        },
+        {
+          "function": "WithTimeoutCause",
+          "description": "Creates context with timeout and cancellation cause",
+          "impact": "new",
+          "example": "ctx, cancel := context.WithTimeoutCause(parent, 5*time.Second, errors.New(\"operation timeout\"))"
+        },
+        {
+          "function": "Cause",
+          "description": "Returns cancellation cause of context",
+          "impact": "new",
+          "example": "if cause := context.Cause(ctx); cause != nil { ... }"
+        }
+      ],
+      "errors": [
+        {
+          "function": "ErrUnsupported",
+          "description": "New sentinel error for unsupported operations",
+          "impact": "new",
+          "example": "if errors.Is(err, errors.ErrUnsupported) { ... }"
+        }
+      ],
+      "reflect": [
+        {
+          "function": "TypeFor",
+          "description": "Returns reflect.Type for generic type parameter",
+          "impact": "new",
+          "example": "typ := reflect.TypeFor[int]() // equivalent to reflect.TypeOf((*int)(nil)).Elem()"
         }
       ]
     }
