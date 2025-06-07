@@ -1,0 +1,175 @@
+{
+  "version": "1.14",
+  "release_date": "2020-02-25T00:00:00Z",
+  "summary": "Go 1.14 introduces asynchronous preemption, major defer performance improvements, overlapping interface method sets, and production-ready modules.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Overlapping interface method sets: interfaces can now embed other interfaces with overlapping methods",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Asynchronous preemption: goroutines can now be preempted at any safe point, eliminating tight loop blocking",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Defer performance optimization: significant overhead reduction for defer statements",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Page allocator efficiency: less lock contention and more efficient memory management",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Internal timer optimization: more efficient timers with fewer context switches",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Mutex unlock optimization: directly yields CPU to waiting goroutines",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "unsafe.Pointer safety checks: new -d=checkptr flag for dynamic pointer validation",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Machine-readable optimization logs: -json flag for compiler optimization analysis",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Bounds check elimination improvements: better optimization of array/slice bounds checks",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Modules production-ready: encouraged migration from GOPATH to Go modules",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "macOS 10.11 El Capitan last supported release (breaking change in future versions)",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "32-bit macOS binary support dropped",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "Experimental 64-bit RISC-V Linux support",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "64-bit ARM support for FreeBSD",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "hash/maphash": [
+      {
+        "description": "New package providing hash functions for byte sequences with collision resistance",
+        "impact": "new",
+        "example": "// Fast, non-cryptographic hash functions for maps and data structures"
+      },
+      {
+        "function": "Hash",
+        "description": "Hash state for computing hash values of byte sequences",
+        "impact": "new",
+        "example": "var h maphash.Hash\nh.SetSeed(maphash.MakeSeed())\nhash := h.Sum64()"
+      },
+      {
+        "function": "String",
+        "description": "Returns hash value for string using seed",
+        "impact": "new",
+        "example": "hash := maphash.String(seed, \"hello world\")"
+      },
+      {
+        "function": "Bytes",
+        "description": "Returns hash value for byte slice using seed",
+        "impact": "new",
+        "example": "hash := maphash.Bytes(seed, []byte(\"data\"))"
+      }
+    ],
+    "testing": [
+      {
+        "function": "TB.Cleanup",
+        "description": "Registers cleanup function to run when test and all subtests complete",
+        "impact": "new",
+        "example": "t.Cleanup(func() {\n    // cleanup resources\n    os.RemoveAll(tempDir)\n})"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "SSL 3.0 support removed for enhanced security",
+        "impact": "breaking",
+        "example": "// SSL 3.0 connections now fail"
+      },
+      {
+        "description": "Improved certificate selection algorithm for better compatibility",
+        "impact": "enhancement",
+        "example": "// More intelligent certificate chain selection"
+      }
+    ],
+    "net/http": [
+      {
+        "function": "Header.Values",
+        "description": "Returns all values associated with given header key",
+        "impact": "new",
+        "example": "values := header.Values(\"Accept-Encoding\")"
+      }
+    ],
+    "reflect": [
+      {
+        "function": "StructOf",
+        "description": "Enhanced to support unexported fields for better reflection capabilities",
+        "impact": "enhancement",
+        "example": "// Can now create struct types with unexported fields"
+      }
+    ],
+    "runtime": [
+      {
+        "description": "Goroutine preemption improvements eliminating infinite loop blocking",
+        "impact": "performance",
+        "example": "// Tight loops no longer block other goroutines indefinitely"
+      }
+    ],
+    "sync": [
+      {
+        "description": "Mutex and other synchronization primitives performance improvements",
+        "impact": "performance",
+        "example": "// Faster lock acquisition and release"
+      }
+    ],
+    "unicode": [
+      {
+        "description": "Unicode support upgraded from version 11.0 to 12.0",
+        "impact": "enhancement",
+        "example": "// Support for new Unicode 12.0 characters and properties"
+      }
+    ],
+    "fmt": [
+      {
+        "description": "Performance improvements in formatting operations",
+        "impact": "performance",
+        "example": "// Faster Printf and string formatting"
+      }
+    ],
+    "math/bits": [
+      {
+        "description": "Performance improvements for bit manipulation functions",
+        "impact": "performance",
+        "example": "// Faster bit counting and manipulation operations"
+      }
+    ]
+  }
+}

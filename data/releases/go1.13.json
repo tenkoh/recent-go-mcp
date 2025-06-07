@@ -1,0 +1,186 @@
+{
+  "version": "1.13",
+  "release_date": "2019-09-03T00:00:00Z",
+  "summary": "Go 1.13 introduces new number literals with digit separators, error wrapping, Ed25519 cryptography, and major defer performance improvements.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Binary integer literals: 0b or 0B prefix for binary number representation",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Octal integer literals: 0o or 0O prefix for clearer octal number syntax",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Hexadecimal floating-point literals: precise floating-point constant representation",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Digit separators: underscores in numeric literals for improved readability",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Signed shift counts: removed restriction requiring uint conversion for shift operations",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Defer performance improvement: 30% faster execution for most defer statements",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Memory return optimization: more aggressive memory return to operating system",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Escape analysis improvements: more precise stack allocation decisions",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Enhanced panic messages: out-of-range errors now include more context",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "Native Client (NaCl) last supported release",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "Android 10 compatibility and support",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "Illumos operating system support added",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "crypto/ed25519": [
+      {
+        "description": "New package implementing Ed25519 signature scheme for high-performance cryptography",
+        "impact": "new",
+        "example": "// Fast, secure digital signatures"
+      },
+      {
+        "function": "GenerateKey",
+        "description": "Generates Ed25519 public/private key pair",
+        "impact": "new",
+        "example": "pub, priv, err := ed25519.GenerateKey(rand.Reader)"
+      },
+      {
+        "function": "Sign",
+        "description": "Signs message using Ed25519 private key",
+        "impact": "new",
+        "example": "signature := ed25519.Sign(privateKey, message)"
+      },
+      {
+        "function": "Verify",
+        "description": "Verifies Ed25519 signature against message and public key",
+        "impact": "new",
+        "example": "valid := ed25519.Verify(publicKey, message, signature)"
+      }
+    ],
+    "errors": [
+      {
+        "function": "Unwrap",
+        "description": "Returns the wrapped error or nil if error doesn't wrap another",
+        "impact": "new",
+        "example": "if innerErr := errors.Unwrap(err); innerErr != nil { ... }"
+      },
+      {
+        "function": "Is",
+        "description": "Reports whether any error in chain matches target error",
+        "impact": "new",
+        "example": "if errors.Is(err, os.ErrNotExist) { ... }"
+      },
+      {
+        "function": "As",
+        "description": "Finds first error in chain that matches target type",
+        "impact": "new",
+        "example": "var pathErr *os.PathError\nif errors.As(err, &pathErr) { ... }"
+      }
+    ],
+    "fmt": [
+      {
+        "function": "Errorf",
+        "description": "Enhanced with %w verb for error wrapping",
+        "impact": "enhancement",
+        "example": "return fmt.Errorf(\"failed to process: %w\", originalErr)"
+      }
+    ],
+    "database/sql": [
+      {
+        "function": "NullTime",
+        "description": "Represents time.Time that may be null in database",
+        "impact": "new",
+        "example": "var nt sql.NullTime\nerr := row.Scan(&nt)\nif nt.Valid { ... }"
+      },
+      {
+        "function": "NullInt32",
+        "description": "Represents int32 that may be null in database",
+        "impact": "new",
+        "example": "var ni sql.NullInt32\nerr := row.Scan(&ni)\nif ni.Valid { ... }"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "TLS 1.3 enabled by default for enhanced security and performance",
+        "impact": "enhancement",
+        "example": "// TLS 1.3 automatically used when supported by both parties"
+      }
+    ],
+    "sync": [
+      {
+        "function": "Pool",
+        "description": "Improved memory management and performance optimizations",
+        "impact": "performance",
+        "example": "// More efficient object pooling with reduced GC pressure"
+      }
+    ],
+    "math/bits": [
+      {
+        "description": "Constant-time execution for security-critical bit operations",
+        "impact": "performance",
+        "example": "// Timing-attack resistant bit manipulation"
+      }
+    ],
+    "unicode": [
+      {
+        "description": "Unicode support upgraded to version 11.0",
+        "impact": "enhancement",
+        "example": "// Support for new Unicode 11.0 characters and categories"
+      }
+    ],
+    "net/http": [
+      {
+        "description": "Enhanced HTTP/2 support with improved performance",
+        "impact": "enhancement",
+        "example": "// Better HTTP/2 flow control and multiplexing"
+      }
+    ],
+    "context": [
+      {
+        "description": "Improved context propagation and cancellation performance",
+        "impact": "performance",
+        "example": "// More efficient context chains and cancellation"
+      }
+    ],
+    "strconv": [
+      {
+        "description": "Enhanced number parsing supporting new literal formats",
+        "impact": "enhancement",
+        "example": "// Parse binary, octal literals with digit separators"
+      }
+    ]
+  }
+}
