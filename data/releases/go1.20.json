@@ -1,0 +1,191 @@
+{
+  "version": "1.20",
+  "release_date": "2023-02-01T00:00:00Z",
+  "summary": "Go 1.20 introduces Profile-Guided Optimization, enhanced slice-to-array conversions, ECDH cryptography, and multiple error wrapping capabilities.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Slice to array conversion: direct conversion from slice to array type with compile-time length checking",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Comparable types constraint: types can satisfy comparable even if comparison might panic at runtime",
+      "impact": "enhancement"
+    },
+    {
+      "category": "language",
+      "description": "Struct and array comparison semantics explicitly defined as field-by-field and element-by-element",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Profile-Guided Optimization (PGO) preview: uses pprof CPU profiles for 3-4% performance improvements",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Garbage collector improvements: reorganized data structures reducing memory overhead by up to 2%",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Generics implementation refinements for better type inference and performance",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "Build speed improvements: up to 10% faster compilation times",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Enhanced code coverage collection with improved accuracy and reporting",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "Last release supporting Windows 7/8 and macOS 10.13/10.14 (breaking change for future versions)",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "Experimental FreeBSD/RISC-V port support",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "crypto/ecdh": [
+      {
+        "description": "New package for Elliptic Curve Diffie-Hellman key exchange supporting NIST curves and X25519",
+        "impact": "new",
+        "example": "// Secure key exchange using elliptic curve cryptography"
+      },
+      {
+        "function": "P256",
+        "description": "Returns NIST P-256 elliptic curve for ECDH operations",
+        "impact": "new",
+        "example": "curve := ecdh.P256()\nprivKey, err := curve.GenerateKey(rand.Reader)"
+      },
+      {
+        "function": "P384",
+        "description": "Returns NIST P-384 elliptic curve for higher security ECDH",
+        "impact": "new",
+        "example": "curve := ecdh.P384()\nprivKey, err := curve.GenerateKey(rand.Reader)"
+      },
+      {
+        "function": "P521",
+        "description": "Returns NIST P-521 elliptic curve for maximum security ECDH",
+        "impact": "new",
+        "example": "curve := ecdh.P521()\nprivKey, err := curve.GenerateKey(rand.Reader)"
+      },
+      {
+        "function": "X25519",
+        "description": "Returns Curve25519 for high-performance ECDH operations",
+        "impact": "new",
+        "example": "curve := ecdh.X25519()\nprivKey, err := curve.GenerateKey(rand.Reader)"
+      },
+      {
+        "function": "PrivateKey.ECDH",
+        "description": "Performs ECDH key exchange to generate shared secret",
+        "impact": "new",
+        "example": "sharedSecret, err := privKey.ECDH(peerPublicKey)"
+      },
+      {
+        "function": "Curve.GenerateKey",
+        "description": "Generates new private key for the elliptic curve",
+        "impact": "new",
+        "example": "privKey, err := curve.GenerateKey(rand.Reader)"
+      }
+    ],
+    "errors": [
+      {
+        "function": "Join",
+        "description": "Combines multiple errors into single error, discarding nil values",
+        "impact": "new",
+        "example": "err := errors.Join(err1, err2, err3)\n// Creates combined error with newline-separated messages"
+      }
+    ],
+    "time": [
+      {
+        "description": "New predefined layout constants for common time formatting patterns",
+        "impact": "new",
+        "example": "// DateTime, DateOnly, TimeOnly constants added"
+      },
+      {
+        "function": "DateTime",
+        "description": "Layout constant \"2006-01-02 15:04:05\" for date and time formatting",
+        "impact": "new",
+        "example": "formatted := now.Format(time.DateTime)"
+      },
+      {
+        "function": "DateOnly",
+        "description": "Layout constant \"2006-01-02\" for date-only formatting",
+        "impact": "new",
+        "example": "dateStr := now.Format(time.DateOnly)"
+      },
+      {
+        "function": "TimeOnly",
+        "description": "Layout constant \"15:04:05\" for time-only formatting", 
+        "impact": "new",
+        "example": "timeStr := now.Format(time.TimeOnly)"
+      }
+    ],
+    "net/http": [
+      {
+        "function": "ResponseController",
+        "description": "New type providing access to extended per-request functionality",
+        "impact": "new",
+        "example": "rc := http.NewResponseController(w)\nrc.SetWriteDeadline(deadline)"
+      },
+      {
+        "function": "NewResponseController",
+        "description": "Creates ResponseController for advanced response control",
+        "impact": "new",
+        "example": "controller := http.NewResponseController(responseWriter)"
+      }
+    ],
+    "context": [
+      {
+        "function": "WithCancelCause",
+        "description": "Creates context with cancellation cause for better error tracking",
+        "impact": "new",
+        "example": "ctx, cancel := context.WithCancelCause(parent)\ncancel(errors.New(\"custom reason\"))"
+      },
+      {
+        "function": "Cause",
+        "description": "Returns the cancellation cause of a context",
+        "impact": "new",
+        "example": "if cause := context.Cause(ctx); cause != nil {\n    log.Printf(\"Context cancelled: %v\", cause)\n}"
+      }
+    ],
+    "crypto": [
+      {
+        "description": "Constant-time implementations improved across cryptographic operations",
+        "impact": "performance",
+        "example": "// Enhanced security against timing attacks"
+      }
+    ],
+    "runtime": [
+      {
+        "description": "Memory allocator optimizations reducing overhead in concurrent scenarios",
+        "impact": "performance",
+        "example": "// Improved performance for high-concurrency applications"
+      }
+    ],
+    "fmt": [
+      {
+        "description": "Performance improvements in formatting operations",
+        "impact": "performance",
+        "example": "// Faster string formatting and printing"
+      }
+    ],
+    "reflect": [
+      {
+        "description": "Enhanced performance for reflection operations with generics",
+        "impact": "performance",
+        "example": "// Optimized reflection with generic types"
+      }
+    ]
+  }
+}
