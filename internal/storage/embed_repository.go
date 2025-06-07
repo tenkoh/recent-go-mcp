@@ -1,26 +1,33 @@
 package storage
 
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"path"
 	"sort"
 	
 	"github.com/tenkoh/recent-go-mcp/internal/domain"
 )
 
+// FullFS combines all the filesystem interfaces we need
+type FullFS interface {
+	fs.FS
+	fs.ReadDirFS
+	fs.ReadFileFS
+}
+
 // EmbeddedReleaseRepository implements ReleaseRepository using embedded JSON files
 type EmbeddedReleaseRepository struct {
 	releases   []*domain.GoRelease
 	comparator domain.VersionComparator
-	fs         embed.FS
+	fs         FullFS
 }
 
 // NewEmbeddedReleaseRepository creates a new repository with embedded data
-func NewEmbeddedReleaseRepository(fs embed.FS, comparator domain.VersionComparator) (domain.ReleaseRepository, error) {
+func NewEmbeddedReleaseRepository(filesystem FullFS, comparator domain.VersionComparator) (domain.ReleaseRepository, error) {
 	repo := &EmbeddedReleaseRepository{
-		fs:         fs,
+		fs:         filesystem,
 		comparator: comparator,
 	}
 	
