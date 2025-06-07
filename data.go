@@ -8,14 +8,33 @@ import (
 	"strings"
 )
 
-//go:embed releases.json
-var releasesData []byte
+//go:embed data/releases/go1.23.json
+var go123Data []byte
+
+//go:embed data/releases/go1.22.json
+var go122Data []byte
+
+//go:embed data/releases/go1.21.json
+var go121Data []byte
 
 var goReleases []GoRelease
 
 func init() {
-	if err := json.Unmarshal(releasesData, &goReleases); err != nil {
-		panic(fmt.Sprintf("failed to load release data: %v", err))
+	// Load all embedded release files
+	releaseFiles := map[string][]byte{
+		"1.23": go123Data,
+		"1.22": go122Data,
+		"1.21": go121Data,
+	}
+	
+	goReleases = make([]GoRelease, 0, len(releaseFiles))
+	
+	for version, data := range releaseFiles {
+		var release GoRelease
+		if err := json.Unmarshal(data, &release); err != nil {
+			panic(fmt.Sprintf("failed to load release data for Go %s: %v", version, err))
+		}
+		goReleases = append(goReleases, release)
 	}
 	
 	// Sort releases by version in descending order (newest first)

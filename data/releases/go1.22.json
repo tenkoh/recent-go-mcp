@@ -1,0 +1,235 @@
+{
+  "version": "1.22",
+  "release_date": "2024-02-06T00:00:00Z",
+  "summary": "Go 1.22 introduces revolutionary for-range improvements, math/rand/v2, enhanced HTTP routing, and significant performance gains.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "For-range over integers: range over integer values directly (e.g., for i := range 10)",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "For-loop variable semantics: each iteration creates new variables, preventing accidental sharing bugs",
+      "impact": "enhancement"
+    },
+    {
+      "category": "language",
+      "description": "Experimental range-over-function iterators for future iterator support",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Garbage collection metadata optimization providing 1-3% CPU performance improvement",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Profile-guided optimization (PGO) improvements with better devirtualization and inlining",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "go work vendor command for vendoring dependencies in workspace mode",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Enhanced tracing and profiling capabilities",
+      "impact": "enhancement"
+    }
+  ],
+  "packages": {
+    "math/rand/v2": [
+      {
+        "description": "First v2 standard library package with modern random number generation",
+        "impact": "new",
+        "example": "// Automatically seeded, no need for manual seeding"
+      },
+      {
+        "function": "N",
+        "description": "Generic random number generator - returns random value in [0, n)",
+        "impact": "new",
+        "example": "rand.N(100) // returns random int in [0, 100)\nrand.N(uint64(1000)) // works with any integer type"
+      },
+      {
+        "function": "IntN",
+        "description": "Returns random int in [0, n) - replaces old Intn",
+        "impact": "new",
+        "example": "num := rand.IntN(100)"
+      },
+      {
+        "function": "Uint32N",
+        "description": "Returns random uint32 in [0, n)",
+        "impact": "new",
+        "example": "num := rand.Uint32N(1000)"
+      },
+      {
+        "function": "Uint64N",
+        "description": "Returns random uint64 in [0, n)",
+        "impact": "new",
+        "example": "num := rand.Uint64N(1000000)"
+      },
+      {
+        "description": "ChaCha8 and PCG generators replace older algorithms for better randomness",
+        "impact": "enhancement",
+        "example": "// More cryptographically secure random generation"
+      }
+    ],
+    "net/http": [
+      {
+        "function": "ServeMux",
+        "description": "Revolutionary routing with method-specific patterns and wildcard support",
+        "impact": "enhancement",
+        "example": "mux.HandleFunc(\"GET /users/{id}\", getUser)\nmux.HandleFunc(\"POST /users\", createUser)\nmux.HandleFunc(\"/files/{path...}\", serveFiles)"
+      },
+      {
+        "function": "Request.PathValue",
+        "description": "Extract path parameters from wildcard routes",
+        "impact": "new",
+        "example": "userID := r.PathValue(\"id\")\nfilePath := r.PathValue(\"path\")"
+      },
+      {
+        "description": "Method-specific routing enables RESTful patterns without external routers",
+        "impact": "enhancement",
+        "example": "// GET /api/users and POST /api/users can have different handlers"
+      },
+      {
+        "description": "Wildcard path matching with {name} and {name...} syntax",
+        "impact": "new",
+        "example": "// /users/{id} matches /users/123\n// /files/{path...} matches /files/docs/readme.txt"
+      },
+      {
+        "description": "GODEBUG httpmuxgo121=1 available for backwards compatibility",
+        "impact": "breaking",
+        "example": "// Some existing routing patterns may need adjustment"
+      }
+    ],
+    "slices": [
+      {
+        "function": "Concat",
+        "description": "Efficiently concatenate multiple slices of the same type",
+        "impact": "new",
+        "example": "result := slices.Concat(slice1, slice2, slice3)\n// More efficient than append chains"
+      },
+      {
+        "function": "Insert",
+        "description": "Insert elements at specific index",
+        "impact": "new",
+        "example": "result := slices.Insert(slice, index, values...)"
+      },
+      {
+        "function": "Delete",
+        "description": "Delete elements from slice by index range",
+        "impact": "new",
+        "example": "result := slices.Delete(slice, start, end)"
+      },
+      {
+        "function": "Replace",
+        "description": "Replace slice elements with new values",
+        "impact": "new",
+        "example": "result := slices.Replace(slice, start, end, values...)"
+      }
+    ],
+    "maps": [
+      {
+        "function": "Clone",
+        "description": "Create shallow copy of map",
+        "impact": "new",
+        "example": "newMap := maps.Clone(originalMap)"
+      },
+      {
+        "function": "Copy",
+        "description": "Copy key-value pairs from one map to another",
+        "impact": "new",
+        "example": "maps.Copy(dst, src) // copies src entries to dst"
+      },
+      {
+        "function": "DeleteFunc",
+        "description": "Delete map entries based on predicate function",
+        "impact": "new",
+        "example": "maps.DeleteFunc(m, func(k, v) bool { return v < 0 })"
+      },
+      {
+        "function": "Equal",
+        "description": "Compare two maps for equality",
+        "impact": "new",
+        "example": "if maps.Equal(map1, map2) { ... }"
+      },
+      {
+        "function": "EqualFunc",
+        "description": "Compare maps with custom equality function",
+        "impact": "new",
+        "example": "maps.EqualFunc(m1, m2, func(v1, v2 Type) bool { ... })"
+      }
+    ],
+    "go/version": [
+      {
+        "function": "Compare",
+        "description": "New package for Go version string comparison",
+        "impact": "new",
+        "example": "if version.Compare(\"go1.22\", \"go1.21\") > 0 { ... }"
+      },
+      {
+        "function": "IsValid",
+        "description": "Validate Go version string format",
+        "impact": "new",
+        "example": "if version.IsValid(\"go1.22.1\") { ... }"
+      },
+      {
+        "function": "Lang",
+        "description": "Extract language version from release version",
+        "impact": "new",
+        "example": "lang := version.Lang(\"go1.22.1\") // returns \"go1.22\""
+      }
+    ],
+    "testing/slogtest": [
+      {
+        "description": "New package for testing structured logging with slog",
+        "impact": "new",
+        "example": "// Enhanced testing utilities for structured logging"
+      }
+    ],
+    "log/slog": [
+      {
+        "function": "SetLogLoggerLevel",
+        "description": "Set minimum level for default logger",
+        "impact": "new",
+        "example": "slog.SetLogLoggerLevel(slog.LevelDebug)"
+      },
+      {
+        "description": "Performance improvements for high-throughput logging",
+        "impact": "performance",
+        "example": "// Faster structured logging with reduced allocations"
+      }
+    ],
+    "encoding/json": [
+      {
+        "description": "Improved performance for JSON marshaling/unmarshaling",
+        "impact": "performance",
+        "example": "// 5-10% faster JSON processing"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "TLS 1.3 performance improvements and better cipher suite selection",
+        "impact": "performance",
+        "example": "// More efficient TLS handshakes"
+      }
+    ],
+    "cmp": [
+      {
+        "function": "Compare",
+        "description": "Generic comparison function for ordered types",
+        "impact": "new",
+        "example": "result := cmp.Compare(a, b) // returns -1, 0, or 1"
+      },
+      {
+        "function": "Less",
+        "description": "Generic less-than comparison",
+        "impact": "new",
+        "example": "if cmp.Less(a, b) { ... }"
+      }
+    ]
+  }
+}

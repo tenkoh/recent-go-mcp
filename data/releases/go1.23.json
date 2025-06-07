@@ -1,0 +1,227 @@
+{
+  "version": "1.23",
+  "release_date": "2024-08-13T00:00:00Z",
+  "summary": "Go 1.23 introduces powerful iterator support, major timer improvements, new packages, and enhanced standard library with breaking changes for modern coding.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Range-over-func: for-range loops can now iterate over iterator functions with signatures func(func() bool), func(func(K) bool), or func(func(K, V) bool)",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Timer/Ticker major improvements: immediate GC of unused timers, unbuffered channels, reduced CPU overhead",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Profile Guided Optimization (PGO) build time overhead significantly reduced",
+      "impact": "performance"
+    },
+    {
+      "category": "language",
+      "description": "Generic type aliases preview support (GOEXPERIMENT=aliastypeparams)",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "macOS minimum version increased to 11+ (breaking change for older macOS)",
+      "impact": "breaking"
+    },
+    {
+      "category": "toolchain",
+      "description": "New stdversion analyzer in go vet detects Go version requirements",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Optional telemetry collection for Go toolchain usage analytics",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "iter": [
+      {
+        "description": "New package providing iterator type definitions for range-over-func",
+        "impact": "new",
+        "example": "type Seq[V any] func(yield func(V) bool)\ntype Seq2[K, V any] func(yield func(K, V) bool)"
+      }
+    ],
+    "unique": [
+      {
+        "function": "Make",
+        "description": "New package for value canonicalization/interning to reduce memory usage",
+        "impact": "new",
+        "example": "handle := unique.Make(\"string\")\n// Multiple calls with same value return same handle"
+      }
+    ],
+    "structs": [
+      {
+        "description": "New package for struct field layout control and analysis",
+        "impact": "new",
+        "example": "// Provides control over struct memory layout"
+      }
+    ],
+    "slices": [
+      {
+        "function": "All",
+        "description": "Returns iterator over slice indexes and values",
+        "impact": "new",
+        "example": "for i, v := range slices.All(slice) { ... }"
+      },
+      {
+        "function": "Values",
+        "description": "Returns iterator over slice values only",
+        "impact": "new",
+        "example": "for v := range slices.Values(slice) { ... }"
+      },
+      {
+        "function": "Backward",
+        "description": "Returns iterator over slice elements in reverse order",
+        "impact": "new",
+        "example": "for i, v := range slices.Backward(slice) { ... }"
+      },
+      {
+        "function": "Collect",
+        "description": "Converts iterator to slice",
+        "impact": "new",
+        "example": "result := slices.Collect(iterator)"
+      },
+      {
+        "function": "AppendSeq",
+        "description": "Appends values from iterator to slice",
+        "impact": "new",
+        "example": "result := slices.AppendSeq(slice, iterator)"
+      },
+      {
+        "function": "Sorted",
+        "description": "Collects values from iterator into sorted slice",
+        "impact": "new",
+        "example": "sorted := slices.Sorted(iterator)"
+      },
+      {
+        "function": "SortedFunc",
+        "description": "Collects values from iterator into slice sorted by custom function",
+        "impact": "new",
+        "example": "sorted := slices.SortedFunc(iterator, cmp)"
+      },
+      {
+        "function": "SortedStableFunc",
+        "description": "Stable sort version of SortedFunc",
+        "impact": "new",
+        "example": "sorted := slices.SortedStableFunc(iterator, cmp)"
+      },
+      {
+        "function": "Chunk",
+        "description": "Returns iterator over consecutive sub-slices of up to n elements",
+        "impact": "new",
+        "example": "for chunk := range slices.Chunk(slice, 3) { ... }"
+      }
+    ],
+    "maps": [
+      {
+        "function": "All",
+        "description": "Returns iterator over key-value pairs",
+        "impact": "new",
+        "example": "for k, v := range maps.All(m) { ... }"
+      },
+      {
+        "function": "Keys",
+        "description": "Returns iterator over map keys",
+        "impact": "new",
+        "example": "for k := range maps.Keys(m) { ... }"
+      },
+      {
+        "function": "Values",
+        "description": "Returns iterator over map values",
+        "impact": "new",
+        "example": "for v := range maps.Values(m) { ... }"
+      },
+      {
+        "function": "Insert",
+        "description": "Adds key-value pairs from iterator to map",
+        "impact": "new",
+        "example": "maps.Insert(m, iterator)"
+      },
+      {
+        "function": "Collect",
+        "description": "Creates new map from iterator of key-value pairs",
+        "impact": "new",
+        "example": "newMap := maps.Collect(iterator)"
+      }
+    ],
+    "time": [
+      {
+        "description": "Timer and Ticker performance improvements - unused timers are immediately garbage collected",
+        "impact": "performance",
+        "example": "// Timers now use unbuffered channels and have reduced overhead"
+      },
+      {
+        "function": "Timer.Reset",
+        "description": "Behavior change: Reset on stopped/expired timer now returns false (breaking change)",
+        "impact": "breaking",
+        "example": "// Old code may need adjustment for timer reset logic"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "Encrypted Client Hello (ECH) support for enhanced privacy",
+        "impact": "new",
+        "example": "// Automatic ECH support when available"
+      },
+      {
+        "description": "Post-quantum key exchange mechanism support (experimental)",
+        "impact": "new",
+        "example": "// Future-proofing against quantum computing threats"
+      }
+    ],
+    "net": [
+      {
+        "description": "Enhanced TCP keep-alive configuration with more granular control",
+        "impact": "enhancement",
+        "example": "// Better control over connection keep-alive behavior"
+      }
+    ],
+    "net/http": [
+      {
+        "description": "Improved cookie parsing and handling for better HTTP compliance",
+        "impact": "enhancement",
+        "example": "// More robust cookie parsing edge cases"
+      },
+      {
+        "function": "ServeFileFS",
+        "description": "Enhanced file serving from filesystem with better security",
+        "impact": "enhancement",
+        "example": "http.ServeFileFS(w, r, fsys, name)"
+      }
+    ],
+    "cmp": [
+      {
+        "function": "Or",
+        "description": "Returns first non-zero value or zero value of type",
+        "impact": "new",
+        "example": "result := cmp.Or(a, b, c) // first non-zero value"
+      }
+    ],
+    "go/version": [
+      {
+        "function": "Compare",
+        "description": "Compares Go version strings",
+        "impact": "new",
+        "example": "if version.Compare(\"go1.22\", \"go1.21\") > 0 { ... }"
+      },
+      {
+        "function": "IsValid",
+        "description": "Reports whether version string is valid",
+        "impact": "new",
+        "example": "if version.IsValid(\"go1.23\") { ... }"
+      },
+      {
+        "function": "Lang",
+        "description": "Returns Go language version from release version",
+        "impact": "new",
+        "example": "lang := version.Lang(\"go1.23.1\") // returns \"go1.23\""
+      }
+    ]
+  }
+}
