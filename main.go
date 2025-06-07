@@ -2,17 +2,52 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"sort"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/tenkoh/recent-go-mcp/internal/domain"
+	"github.com/tenkoh/recent-go-mcp/internal/service"
+	"github.com/tenkoh/recent-go-mcp/internal/storage"
+	"github.com/tenkoh/recent-go-mcp/internal/version"
 )
 
+// Embed all Go release data files
+//go:embed data/releases/*.json
+var releasesFS embed.FS
+
+// MCPServer wraps the dependencies for the MCP server
+type MCPServer struct {
+	featureService domain.FeatureService
+	formatter      domain.ResponseFormatter
+}
+
+// NewMCPServer creates a new MCP server with injected dependencies
+func NewMCPServer(featureService domain.FeatureService, formatter domain.ResponseFormatter) *MCPServer {
+	return &MCPServer{
+		featureService: featureService,
+		formatter:      formatter,
+	}
+}
+
 func main() {
+	// Initialize dependencies
+	comparator := version.NewSemanticVersionComparator()
+	
+	repo, err := storage.NewEmbeddedReleaseRepository(releasesFS, comparator)
+	if err != nil {
+		log.Fatalf("Failed to initialize repository: %v", err)
+	}
+	
+	featureService := service.NewFeatureService(repo, comparator)
+	formatter := service.NewResponseFormatter(comparator)
+	
+	mcpServer := NewMCPServer(featureService, formatter)
+	
 	// Create MCP server
 	s := server.NewMCPServer("recent-go-mcp", "1.0.0", 
 		server.WithToolCapabilities(false))
@@ -27,7 +62,7 @@ func main() {
 			mcp.Description("Optional: filter features for a specific standard library package (e.g., 'net/http', 'context')")))
 
 	// Add tool handler
-	s.AddTool(goUpdatesTool, handleGoUpdates)
+	s.AddTool(goUpdatesTool, mcpServer.handleGoUpdates)
 
 	// Start server
 	if err := server.ServeStdio(s); err != nil {
@@ -35,7 +70,7 @@ func main() {
 	}
 }
 
-func handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (m *MCPServer) handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := request.GetArguments()
 	
 	// Extract version argument (required)
@@ -57,20 +92,20 @@ func handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 	}
 	
-	// Get features
-	updates, err := getFeaturesForVersion(version, packageName)
+	// Get features using the service
+	response, err := m.featureService.GetFeaturesForVersion(version, packageName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error getting updates: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Error getting features: %v", err)), nil
 	}
 	
 	// Format response as JSON
-	responseJSON, err := json.MarshalIndent(updates, "", "  ")
+	responseJSON, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error formatting response: %v", err)), nil
 	}
 	
-	// Create detailed text response
-	textResponse := formatUpdatesAsText(updates, version, packageName)
+	// Create detailed text response using formatter
+	textResponse := m.formatter.FormatAsText(response, version, packageName)
 	
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -80,103 +115,7 @@ func handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}, nil
 }
 
-func formatUpdatesAsText(updates *UpdateResponse, fromVersion, packageName string) string {
-	if len(updates.Changes) == 0 && len(updates.PackageInfo) == 0 {
-		return fmt.Sprintf("✅ No Go features found for your project (Go %s).", updates.ToVersion)
-	}
-	
-	text := fmt.Sprintf("🔄 **Go Features Available in Your Project (Go %s)**\n\n", updates.ToVersion)
-	text += fmt.Sprintf("📋 **Summary**: %s\n\n", updates.Summary)
-	
-	// Get sorted versions for chronological display
-	var versions []string
-	for version := range updates.VersionChanges {
-		versions = append(versions, version)
-	}
-	sort.Strings(versions) // Simple string sort works for our version format
-	
-	// Display features by version (oldest to newest)
-	for _, version := range versions {
-		versionChanges := updates.VersionChanges[version]
-		versionPackages := updates.VersionPackages[version]
-		
-		// Skip if no relevant changes for this version
-		if len(versionChanges) == 0 && len(versionPackages) == 0 {
-			continue
-		}
-		
-		text += fmt.Sprintf("## 📦 **Go %s Features**\n\n", version)
-		
-		// Show general changes for this version
-		if len(versionChanges) > 0 {
-			text += "### 🚀 **Language & Runtime Changes**\n"
-			for _, change := range versionChanges {
-				icon := getImpactIcon(change.Impact)
-				text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Category, change.Description)
-			}
-			text += "\n"
-		}
-		
-		// Show package changes for this version
-		if len(versionPackages) > 0 {
-			text += "### 📚 **Standard Library Updates**\n"
-			
-			for pkg, changes := range versionPackages {
-				if packageName != "" && pkg != packageName {
-					continue // Skip if filtering for specific package
-				}
-				
-				if packageName == "" {
-					text += fmt.Sprintf("#### `%s`\n", pkg)
-				}
-				
-				for _, change := range changes {
-					icon := getImpactIcon(change.Impact)
-					if change.Function != "" {
-						text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Function, change.Description)
-					} else {
-						text += fmt.Sprintf("- %s %s\n", icon, change.Description)
-					}
-					
-					if change.Example != "" {
-						text += fmt.Sprintf("  ```go\n  %s\n  ```\n", change.Example)
-					}
-				}
-				text += "\n"
-			}
-		}
-		
-		text += "\n"
-	}
-	
-	text += "---\n"
-	text += "💡 **Tip**: These are all the Go features available in your project version. Use them to write modern, efficient Go code!\n"
-	
-	return text
-}
-
-func getImpactIcon(impact string) string {
-	switch impact {
-	case "new":
-		return "🆕"
-	case "enhancement":
-		return "✨"
-	case "performance":
-		return "⚡"
-	case "breaking":
-		return "⚠️"
-	case "deprecation":
-		return "🗑️"
-	default:
-		return "📝"
-	}
-}
-
 func init() {
-	// Ensure we have release data loaded
-	if len(goReleases) == 0 {
-		fmt.Fprintf(os.Stderr, "Warning: No Go release data loaded\n")
-	} else {
-		fmt.Fprintf(os.Stderr, "Loaded %d Go releases\n", len(goReleases))
-	}
+	// Log initialization information
+	fmt.Fprintf(os.Stderr, "Initializing recent-go-mcp server with dependency injection architecture\n")
 }

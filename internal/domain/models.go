@@ -1,4 +1,4 @@
-package main
+package domain
 
 import "time"
 
@@ -27,14 +27,8 @@ type PackageChange struct {
 	Example     string `json:"example,omitempty"`
 }
 
-// UpdateRequest represents the input for the go-updates tool
-type UpdateRequest struct {
-	Version string `json:"version"`
-	Package string `json:"package,omitempty"`
-}
-
-// UpdateResponse represents the response from the go-updates tool
-type UpdateResponse struct {
+// FeatureResponse represents the response containing features available up to a version
+type FeatureResponse struct {
 	FromVersion     string                                    `json:"from_version"`
 	ToVersion       string                                    `json:"to_version"`
 	Summary         string                                    `json:"summary"`
