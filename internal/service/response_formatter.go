@@ -19,14 +19,14 @@ func NewResponseFormatter(comparator domain.VersionComparator) domain.ResponseFo
 	}
 }
 
-// FormatAsText formats a FeatureResponse as human-readable text
+// FormatAsText formats a FeatureResponse as LLM-readable text
 func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse, version string, packageName string) string {
 	if len(response.Changes) == 0 && len(response.PackageInfo) == 0 {
-		return fmt.Sprintf("✅ No Go features found for your project (Go %s).", response.ToVersion)
+		return fmt.Sprintf("No Go features found for your project (Go %s).", response.ToVersion)
 	}
 	
-	text := fmt.Sprintf("🔄 **Go Features Available in Your Project (Go %s)**\n\n", response.ToVersion)
-	text += fmt.Sprintf("📋 **Summary**: %s\n\n", response.Summary)
+	text := fmt.Sprintf("Go Features Available in Your Project (Go %s)\n\n", response.ToVersion)
+	text += fmt.Sprintf("Summary: %s\n\n", response.Summary)
 	
 	// Get sorted versions for chronological display
 	var versions []string
@@ -45,21 +45,20 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 			continue
 		}
 		
-		text += fmt.Sprintf("## 📦 **Go %s Features**\n\n", version)
+		text += fmt.Sprintf("Go %s Features:\n\n", version)
 		
 		// Show general changes for this version
 		if len(versionChanges) > 0 {
-			text += "### 🚀 **Language & Runtime Changes**\n"
+			text += "Language & Runtime Changes:\n"
 			for _, change := range versionChanges {
-				icon := f.getImpactIcon(change.Impact)
-				text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Category, change.Description)
+				text += fmt.Sprintf("- %s (%s): %s\n", change.Category, change.Impact, change.Description)
 			}
 			text += "\n"
 		}
 		
 		// Show package changes for this version
 		if len(versionPackages) > 0 {
-			text += "### 📚 **Standard Library Updates**\n"
+			text += "Standard Library Updates:\n"
 			
 			for pkg, changes := range versionPackages {
 				if packageName != "" && pkg != packageName {
@@ -67,19 +66,18 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 				}
 				
 				if packageName == "" {
-					text += fmt.Sprintf("#### `%s`\n", pkg)
+					text += fmt.Sprintf("Package %s:\n", pkg)
 				}
 				
 				for _, change := range changes {
-					icon := f.getImpactIcon(change.Impact)
 					if change.Function != "" {
-						text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Function, change.Description)
+						text += fmt.Sprintf("- %s (%s): %s\n", change.Function, change.Impact, change.Description)
 					} else {
-						text += fmt.Sprintf("- %s %s\n", icon, change.Description)
+						text += fmt.Sprintf("- (%s): %s\n", change.Impact, change.Description)
 					}
 					
 					if change.Example != "" {
-						text += fmt.Sprintf("  ```go\n  %s\n  ```\n", change.Example)
+						text += fmt.Sprintf("  Example: %s\n", change.Example)
 					}
 				}
 				text += "\n"
@@ -89,8 +87,7 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 		text += "\n"
 	}
 	
-	text += "---\n"
-	text += "💡 **Tip**: These are all the Go features available in your project version. Use them to write modern, efficient Go code!\n"
+	text += "Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.\n"
 	
 	return text
 }
@@ -102,20 +99,3 @@ func (f *DefaultResponseFormatter) sortVersions(versions []string) {
 	})
 }
 
-// getImpactIcon returns an appropriate emoji icon for the impact type
-func (f *DefaultResponseFormatter) getImpactIcon(impact string) string {
-	switch impact {
-	case "new":
-		return "🆕"
-	case "enhancement":
-		return "✨"
-	case "performance":
-		return "⚡"
-	case "breaking":
-		return "⚠️"
-	case "deprecation":
-		return "🗑️"
-	default:
-		return "📝"
-	}
-}
