@@ -1,0 +1,185 @@
+{
+  "version": "1.15",
+  "release_date": "2020-08-11T00:00:00Z",
+  "summary": "Go 1.15 delivers significant performance improvements for small object allocation, linker optimizations, reduced binary sizes, and enhanced concurrency.",
+  "changes": [
+    {
+      "category": "runtime",
+      "description": "Small object allocation optimization: dramatically improved performance at high core counts",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Interface conversion optimization: small integer to interface conversion no longer allocates",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Channel operation optimization: non-blocking receives on closed channels now as fast as open channels",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Panic value printing: improved debugging with actual values instead of addresses",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "Binary size reduction: ~5% smaller binaries by eliminating certain GC metadata",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Linker improvements: 20% faster with 30% less memory usage on ELF systems",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Spectre mitigation support: new -spectre flag for security hardening",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Compiler directive validation: clearer error messages for misplaced directives",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "32-bit macOS support dropped: ending support for older Mac systems",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "X.509 CommonName validation deprecated: transitioning to Subject Alternative Names",
+      "impact": "deprecation"
+    }
+  ],
+  "packages": {
+    "time/tzdata": [
+      {
+        "description": "New package for embedding timezone database into programs",
+        "impact": "new",
+        "example": "import _ \"time/tzdata\" // embeds timezone data for consistent behavior"
+      }
+    ],
+    "crypto/ecdsa": [
+      {
+        "function": "SignASN1",
+        "description": "Signs digest using ECDSA and returns ASN.1 DER encoded signature",
+        "impact": "new",
+        "example": "signature, err := ecdsa.SignASN1(rand.Reader, privateKey, hash)"
+      },
+      {
+        "function": "VerifyASN1",
+        "description": "Verifies ASN.1 DER encoded ECDSA signature",
+        "impact": "new",
+        "example": "valid := ecdsa.VerifyASN1(publicKey, hash, signature)"
+      }
+    ],
+    "crypto/elliptic": [
+      {
+        "function": "MarshalCompressed",
+        "description": "Marshals elliptic curve point in compressed format",
+        "impact": "new",
+        "example": "compressed := elliptic.MarshalCompressed(curve, x, y)"
+      },
+      {
+        "function": "UnmarshalCompressed",
+        "description": "Unmarshals compressed elliptic curve point",
+        "impact": "new",
+        "example": "x, y := elliptic.UnmarshalCompressed(curve, compressed)"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "Enhanced connection verification and session ticket management",
+        "impact": "enhancement",
+        "example": "// Improved TLS handshake performance and security"
+      },
+      {
+        "function": "Conn.VerifyHostname",
+        "description": "Enhanced hostname verification for better security",
+        "impact": "enhancement",
+        "example": "// More robust hostname validation"
+      }
+    ],
+    "net/http": [
+      {
+        "description": "Stricter parsing to prevent HTTP request smuggling attacks",
+        "impact": "breaking",
+        "example": "// Malformed requests now properly rejected"
+      },
+      {
+        "function": "Header.Clone",
+        "description": "Returns deep copy of HTTP headers",
+        "impact": "new",
+        "example": "headerCopy := originalHeaders.Clone()"
+      }
+    ],
+    "net/url": [
+      {
+        "function": "URL.Redacted",
+        "description": "Returns URL string with password redacted for logging",
+        "impact": "new",
+        "example": "safeURL := url.Redacted() // hides password in logs"
+      }
+    ],
+    "crypto/x509": [
+      {
+        "description": "CommonName validation deprecation: encouraging use of Subject Alternative Names",
+        "impact": "deprecation",
+        "example": "// Use SAN instead of CN for certificate validation"
+      }
+    ],
+    "runtime": [
+      {
+        "description": "Concurrent linking process improving build performance",
+        "impact": "performance",
+        "example": "// Faster builds through parallel linking"
+      }
+    ],
+    "fmt": [
+      {
+        "description": "Performance improvements in formatting operations",
+        "impact": "performance",
+        "example": "// Faster Printf and related functions"
+      }
+    ],
+    "math/big": [
+      {
+        "description": "Performance improvements for big integer operations",
+        "impact": "performance",
+        "example": "// Faster arithmetic on large numbers"
+      }
+    ],
+    "testing": [
+      {
+        "function": "TB.Cleanup",
+        "description": "Registers cleanup function to run when test completes",
+        "impact": "new",
+        "example": "t.Cleanup(func() {\n    // cleanup code here\n})"
+      }
+    ],
+    "net": [
+      {
+        "description": "More robust error handling and connection management",
+        "impact": "enhancement",
+        "example": "// Better network error reporting and handling"
+      }
+    ],
+    "os": [
+      {
+        "description": "Enhanced file operation error handling",
+        "impact": "enhancement",
+        "example": "// More descriptive file system error messages"
+      }
+    ],
+    "regexp": [
+      {
+        "description": "Performance improvements for regular expression matching",
+        "impact": "performance",
+        "example": "// Faster regex compilation and execution"
+      }
+    ]
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "version": "1.16",
+  "release_date": "2021-02-16T00:00:00Z",
+  "summary": "Go 1.16 introduces embedded files with go:embed, filesystem abstraction interfaces, module-aware mode by default, and significant linker improvements.",
+  "changes": [
+    {
+      "category": "toolchain",
+      "description": "go:embed directive: embed static files directly into Go binaries at compile time",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Module-aware mode enabled by default: GO111MODULE defaults to 'on' for better dependency management",
+      "impact": "breaking"
+    },
+    {
+      "category": "toolchain",
+      "description": "go install with version suffixes: install specific package versions (e.g., go install example.com/cmd@v1.0.0)",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "go get deprecated for package installation: use go install for executables",
+      "impact": "breaking"
+    },
+    {
+      "category": "toolchain",
+      "description": "Linker improvements: 20-25% reduction in resource usage during builds",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Memory release optimization on Linux: uses MADV_DONTNEED for more efficient memory return to OS",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Race detector precision: more accurate following the Go memory model",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Compiler inlining enhancements: better optimization for function calls",
+      "impact": "performance"
+    },
+    {
+      "category": "platform",
+      "description": "64-bit ARM support on macOS (Apple Silicon native support)",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "iOS simulator AMD64 support for cross-platform development",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "NetBSD ARM64 and OpenBSD MIPS64 architecture support",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "embed": [
+      {
+        "description": "New package for embedding static files into Go programs at compile time",
+        "impact": "new",
+        "example": "//go:embed templates/*\nvar templateFS embed.FS"
+      },
+      {
+        "function": "FS",
+        "description": "Read-only filesystem interface for embedded files",
+        "impact": "new",
+        "example": "//go:embed static\nvar staticFiles embed.FS\ndata, err := staticFiles.ReadFile(\"static/index.html\")"
+      }
+    ],
+    "io/fs": [
+      {
+        "description": "New package providing filesystem abstraction interfaces",
+        "impact": "new",
+        "example": "// Standard interfaces for read-only file tree operations"
+      },
+      {
+        "function": "FS",
+        "description": "Basic filesystem interface for opening files",
+        "impact": "new",
+        "example": "type FS interface {\n    Open(name string) (File, error)\n}"
+      },
+      {
+        "function": "ReadDirFS",
+        "description": "Interface for filesystems supporting directory listing",
+        "impact": "new",
+        "example": "entries, err := fs.ReadDir(fsys, \"dir\")"
+      },
+      {
+        "function": "WalkDir",
+        "description": "Walks filesystem tree calling function for each file/directory",
+        "impact": "new",
+        "example": "fs.WalkDir(fsys, \".\", func(path string, d fs.DirEntry, err error) error { ... })"
+      },
+      {
+        "function": "Glob",
+        "description": "Returns names of files matching pattern in filesystem",
+        "impact": "new",
+        "example": "matches, err := fs.Glob(fsys, \"*.go\")"
+      }
+    ],
+    "runtime/metrics": [
+      {
+        "description": "Stable interface for runtime metrics (promoted from experimental)",
+        "impact": "new",
+        "example": "// Production-ready runtime monitoring capabilities"
+      },
+      {
+        "function": "All",
+        "description": "Returns descriptions of all supported runtime metrics",
+        "impact": "new",
+        "example": "descriptions := metrics.All()\nfor _, desc := range descriptions { ... }"
+      },
+      {
+        "function": "Read",
+        "description": "Reads runtime metrics by name",
+        "impact": "new",
+        "example": "samples := make([]metrics.Sample, len(names))\nmetrics.Read(samples)"
+      }
+    ],
+    "strconv": [
+      {
+        "description": "Eisel-Lemire algorithm implementation for faster float parsing",
+        "impact": "performance",
+        "example": "// Significantly faster ParseFloat operations"
+      }
+    ],
+    "os/signal": [
+      {
+        "function": "NotifyContext",
+        "description": "Returns context that is cancelled when specified signals are received",
+        "impact": "new",
+        "example": "ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)\ndefer stop()"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "Enhanced security with improved certificate validation",
+        "impact": "enhancement",
+        "example": "// Stricter certificate chain validation and security checks"
+      }
+    ],
+    "crypto/x509": [
+      {
+        "description": "System root certificate handling optimization",
+        "impact": "performance",
+        "example": "// More efficient certificate pool management"
+      }
+    ],
+    "net/http": [
+      {
+        "function": "FileServer",
+        "description": "Enhanced to work with io/fs.FS interface for serving embedded files",
+        "impact": "enhancement",
+        "example": "http.Handle(\"/static/\", http.FileServer(http.FS(staticFiles)))"
+      }
+    ],
+    "html/template": [
+      {
+        "function": "ParseFS",
+        "description": "Parse templates from filesystem interface",
+        "impact": "new",
+        "example": "tmpl, err := template.ParseFS(templateFS, \"templates/*.html\")"
+      }
+    ],
+    "text/template": [
+      {
+        "function": "ParseFS",
+        "description": "Parse templates from filesystem interface",
+        "impact": "new",
+        "example": "tmpl, err := template.ParseFS(templateFS, \"templates/*.txt\")"
+      }
+    ],
+    "testing": [
+      {
+        "function": "Testing.TempDir",
+        "description": "Creates temporary directory that is cleaned up automatically",
+        "impact": "new",
+        "example": "tmpDir := t.TempDir() // automatically cleaned up"
+      }
+    ],
+    "reflect": [
+      {
+        "function": "Zero",
+        "description": "Performance optimization for creating zero values",
+        "impact": "performance",
+        "example": "// Faster zero value creation for reflection"
+      }
+    ],
+    "io/ioutil": [
+      {
+        "description": "Package deprecated: functions moved to io and os packages",
+        "impact": "deprecation",
+        "example": "// Use io.ReadAll instead of ioutil.ReadAll"
+      }
+    ]
+  }
+}
