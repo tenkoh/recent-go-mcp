@@ -1,44 +1,43 @@
 package version
 
 import (
-	"fmt"
-	"strings"
+	"go/version"
 	
 	"github.com/tenkoh/recent-go-mcp/internal/domain"
 )
 
-// SemanticVersionComparator implements version comparison for semantic versioning
-type SemanticVersionComparator struct{}
+// GoVersionComparator implements version comparison using Go's official go/version package
+type GoVersionComparator struct{}
 
-// NewSemanticVersionComparator creates a new semantic version comparator
+// NewSemanticVersionComparator creates a new Go version comparator
+// Note: Renamed to maintain interface compatibility, but now uses go/version internally
 func NewSemanticVersionComparator() domain.VersionComparator {
-	return &SemanticVersionComparator{}
+	return &GoVersionComparator{}
 }
 
-// Compare compares two version strings (e.g., "1.23" vs "1.22")
+// Compare compares two Go version strings using the official go/version package
 // Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal
-func (c *SemanticVersionComparator) Compare(v1, v2 string) int {
-	// Simple version comparison for Go versions like "1.23"
-	parts1 := strings.Split(v1, ".")
-	parts2 := strings.Split(v2, ".")
+func (c *GoVersionComparator) Compare(v1, v2 string) int {
+	// Convert to go/version format (e.g., "1.22" -> "go1.22")
+	goV1 := normalizeGoVersion(v1)
+	goV2 := normalizeGoVersion(v2)
 	
-	for i := 0; i < len(parts1) && i < len(parts2); i++ {
-		var n1, n2 int
-		fmt.Sscanf(parts1[i], "%d", &n1)
-		fmt.Sscanf(parts2[i], "%d", &n2)
-		
-		if n1 > n2 {
-			return 1
-		} else if n1 < n2 {
-			return -1
-		}
+	// Use the official Go version comparison
+	return version.Compare(goV1, goV2)
+}
+
+// normalizeGoVersion converts version strings to go/version package format
+// Examples: "1.22" -> "go1.22", "go1.22" -> "go1.22", "1.22.1" -> "go1.22.1"
+func normalizeGoVersion(v string) string {
+	if v == "" {
+		return "go1.0"
 	}
 	
-	if len(parts1) > len(parts2) {
-		return 1
-	} else if len(parts1) < len(parts2) {
-		return -1
+	// If it already starts with "go", return as-is
+	if len(v) >= 2 && v[:2] == "go" {
+		return v
 	}
 	
-	return 0
+	// Add "go" prefix to version number
+	return "go" + v
 }

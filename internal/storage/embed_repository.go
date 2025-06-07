@@ -1,11 +1,11 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"path"
-	"sort"
+	"slices"
 	
 	"github.com/tenkoh/recent-go-mcp/internal/domain"
 )
@@ -32,7 +32,7 @@ func NewEmbeddedReleaseRepository(filesystem FullFS, comparator domain.VersionCo
 	}
 	
 	if err := repo.loadReleases(); err != nil {
-		return nil, fmt.Errorf("failed to load embedded releases: %w", err)
+		return nil, domain.NewRepositoryError("initialization", "failed to load embedded releases", err)
 	}
 	
 	return repo, nil
@@ -43,7 +43,7 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 	// Read all JSON files from the embedded filesystem
 	entries, err := r.fs.ReadDir("data/releases")
 	if err != nil {
-		return fmt.Errorf("failed to read embedded release directory: %w", err)
+		return domain.NewRepositoryError("loadReleases", "failed to read embedded release directory", err)
 	}
 	
 	r.releases = make([]*domain.GoRelease, 0, len(entries))
@@ -54,12 +54,14 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 			
 			data, err := r.fs.ReadFile(filePath)
 			if err != nil {
-				return fmt.Errorf("failed to read embedded file %s: %w", filePath, err)
+				return domain.NewRepositoryError("loadReleases", "failed to read embedded file", err).
+					WithContext("file", filePath)
 			}
 			
 			var release domain.GoRelease
 			if err := json.Unmarshal(data, &release); err != nil {
-				return fmt.Errorf("failed to unmarshal release data from %s: %w", filePath, err)
+				return domain.NewRepositoryError("loadReleases", "failed to unmarshal release data", err).
+					WithContext("file", filePath)
 			}
 			
 			r.releases = append(r.releases, &release)
@@ -67,90 +69,120 @@ func (r *EmbeddedReleaseRepository) loadReleases() error {
 	}
 	
 	if len(r.releases) == 0 {
-		return fmt.Errorf("no release data found in embedded filesystem")
+		return domain.NewRepositoryError("loadReleases", "no release data found in embedded filesystem", nil)
 	}
 	
-	// Sort releases by version in descending order (newest first)
-	sort.Slice(r.releases, func(i, j int) bool {
-		return r.comparator.Compare(r.releases[i].Version, r.releases[j].Version) > 0
+	// Sort releases by version in descending order (newest first) using slices.SortFunc
+	slices.SortFunc(r.releases, func(a, b *domain.GoRelease) int {
+		return -r.comparator.Compare(a.Version, b.Version) // Negative for descending order
 	})
 	
 	return nil
 }
 
 // GetAllReleases returns all available Go releases
-func (r *EmbeddedReleaseRepository) GetAllReleases() ([]*domain.GoRelease, error) {
-	// Return a copy of the slice (but pointers to the same data)
-	// Callers should treat returned data as read-only
-	releases := make([]*domain.GoRelease, len(r.releases))
-	copy(releases, r.releases)
-	return releases, nil
+func (r *EmbeddedReleaseRepository) GetAllReleases(ctx context.Context) ([]*domain.GoRelease, error) {
+	// Check context cancellation
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+	
+	// Return a copy of the slice using slices.Clone (Go 1.21+)
+	return slices.Clone(r.releases), nil
 }
 
 // GetReleaseByVersion returns a specific release by version
-func (r *EmbeddedReleaseRepository) GetReleaseByVersion(version string) (*domain.GoRelease, error) {
-	for _, release := range r.releases {
-		if release.Version == version {
-			// Return pointer to the existing data
-			// Caller should treat returned data as read-only
-			return release, nil
-		}
+func (r *EmbeddedReleaseRepository) GetReleaseByVersion(ctx context.Context, version string) (*domain.GoRelease, error) {
+	// Check context cancellation
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
 	}
-	return nil, fmt.Errorf("release not found for version %s", version)
+	
+	// Find release using slices utilities
+	idx := slices.IndexFunc(r.releases, func(release *domain.GoRelease) bool {
+		return release.Version == version
+	})
+	
+	if idx == -1 {
+		return nil, domain.NewNotFoundError("GetReleaseByVersion", "release not found").
+			WithContext("version", version)
+	}
+	
+	return r.releases[idx], nil
 }
 
 // GetReleasesUpToVersion returns all releases from oldest up to the specified version
-func (r *EmbeddedReleaseRepository) GetReleasesUpToVersion(targetVersion string) ([]*domain.GoRelease, error) {
+func (r *EmbeddedReleaseRepository) GetReleasesUpToVersion(ctx context.Context, targetVersion string) ([]*domain.GoRelease, error) {
+	// Check context cancellation
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+	
 	// First, verify the target version exists
-	if _, err := r.GetReleaseByVersion(targetVersion); err != nil {
+	if _, err := r.GetReleaseByVersion(ctx, targetVersion); err != nil {
 		return nil, err
 	}
 	
-	var result []*domain.GoRelease
-	
-	// Collect all releases up to and including the target version
+	// Filter releases up to target version using slices utilities
+	filtered := make([]*domain.GoRelease, 0, len(r.releases))
 	for _, release := range r.releases {
 		if r.comparator.Compare(release.Version, targetVersion) <= 0 {
-			result = append(result, release)
+			filtered = append(filtered, release)
 		}
 	}
 	
-	// Sort from oldest to newest for chronological display
-	sort.Slice(result, func(i, j int) bool {
-		return r.comparator.Compare(result[i].Version, result[j].Version) < 0
+	// Sort from oldest to newest for chronological display using slices.SortFunc
+	slices.SortFunc(filtered, func(a, b *domain.GoRelease) int {
+		return r.comparator.Compare(a.Version, b.Version)
 	})
 	
-	return result, nil
+	return filtered, nil
 }
 
 // GetOldestVersion returns the oldest available version
-func (r *EmbeddedReleaseRepository) GetOldestVersion() (string, error) {
+func (r *EmbeddedReleaseRepository) GetOldestVersion(ctx context.Context) (string, error) {
+	// Check context cancellation
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+	}
+	
 	if len(r.releases) == 0 {
-		return "", fmt.Errorf("no releases available")
+		return "", domain.NewRepositoryError("GetOldestVersion", "no releases available", nil)
 	}
 	
-	oldest := r.releases[0].Version
-	for _, release := range r.releases {
-		if r.comparator.Compare(release.Version, oldest) < 0 {
-			oldest = release.Version
-		}
-	}
+	// Find minimum using slices.MinFunc (more efficient than manual loop)
+	oldest := slices.MinFunc(r.releases, func(a, b *domain.GoRelease) int {
+		return r.comparator.Compare(a.Version, b.Version)
+	})
 	
-	return oldest, nil
+	return oldest.Version, nil
 }
 
 // GetLatestVersion returns the latest available version
-func (r *EmbeddedReleaseRepository) GetLatestVersion() (string, error) {
+func (r *EmbeddedReleaseRepository) GetLatestVersion(ctx context.Context) (string, error) {
+	// Check context cancellation
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+	}
+	
 	if len(r.releases) == 0 {
-		return "", fmt.Errorf("no releases available")
+		return "", domain.NewRepositoryError("GetLatestVersion", "no releases available", nil)
 	}
 	
-	latest := r.releases[0].Version
-	for _, release := range r.releases {
-		if r.comparator.Compare(release.Version, latest) > 0 {
-			latest = release.Version
-		}
-	}
+	// Find maximum using slices.MaxFunc (more efficient than manual loop)
+	latest := slices.MaxFunc(r.releases, func(a, b *domain.GoRelease) int {
+		return r.comparator.Compare(a.Version, b.Version)
+	})
 	
-	return latest, nil
+	return latest.Version, nil
 }

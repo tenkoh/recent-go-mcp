@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"testing"
 	"testing/fstest"
 	
@@ -34,7 +35,8 @@ func TestEmbeddedReleaseRepository_WithMockFS(t *testing.T) {
 	}
 	
 	// Test the repository
-	releases, err := repo.GetAllReleases()
+	ctx := context.Background()
+	releases, err := repo.GetAllReleases(ctx)
 	if err != nil {
 		t.Fatalf("Failed to get releases: %v", err)
 	}

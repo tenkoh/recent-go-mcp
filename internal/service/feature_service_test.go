@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -13,11 +14,11 @@ type mockRepository struct {
 	releases []*domain.GoRelease
 }
 
-func (m *mockRepository) GetAllReleases() ([]*domain.GoRelease, error) {
+func (m *mockRepository) GetAllReleases(ctx context.Context) ([]*domain.GoRelease, error) {
 	return m.releases, nil
 }
 
-func (m *mockRepository) GetReleaseByVersion(version string) (*domain.GoRelease, error) {
+func (m *mockRepository) GetReleaseByVersion(ctx context.Context, version string) (*domain.GoRelease, error) {
 	for _, release := range m.releases {
 		if release.Version == version {
 			return release, nil
@@ -26,7 +27,7 @@ func (m *mockRepository) GetReleaseByVersion(version string) (*domain.GoRelease,
 	return nil, fmt.Errorf("version not found: %s", version)
 }
 
-func (m *mockRepository) GetReleasesUpToVersion(targetVersion string) ([]*domain.GoRelease, error) {
+func (m *mockRepository) GetReleasesUpToVersion(ctx context.Context, targetVersion string) ([]*domain.GoRelease, error) {
 	var result []*domain.GoRelease
 	for _, release := range m.releases {
 		if release.Version <= targetVersion { // Simple string comparison for testing
@@ -36,14 +37,14 @@ func (m *mockRepository) GetReleasesUpToVersion(targetVersion string) ([]*domain
 	return result, nil
 }
 
-func (m *mockRepository) GetOldestVersion() (string, error) {
+func (m *mockRepository) GetOldestVersion(ctx context.Context) (string, error) {
 	if len(m.releases) == 0 {
 		return "", fmt.Errorf("no releases")
 	}
 	return m.releases[0].Version, nil
 }
 
-func (m *mockRepository) GetLatestVersion() (string, error) {
+func (m *mockRepository) GetLatestVersion(ctx context.Context) (string, error) {
 	if len(m.releases) == 0 {
 		return "", fmt.Errorf("no releases")
 	}
@@ -115,7 +116,8 @@ func TestDefaultFeatureService_GetFeaturesForVersion(t *testing.T) {
 	service := NewFeatureService(repo, comparator)
 	
 	t.Run("successful feature retrieval", func(t *testing.T) {
-		response, err := service.GetFeaturesForVersion("1.22", "")
+		ctx := context.Background()
+		response, err := service.GetFeaturesForVersion(ctx, "1.22", "")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -134,7 +136,8 @@ func TestDefaultFeatureService_GetFeaturesForVersion(t *testing.T) {
 	})
 	
 	t.Run("package filtering", func(t *testing.T) {
-		response, err := service.GetFeaturesForVersion("1.22", "net/http")
+		ctx := context.Background()
+		response, err := service.GetFeaturesForVersion(ctx, "1.22", "net/http")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

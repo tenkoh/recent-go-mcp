@@ -4,9 +4,9 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
+	"reflect"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -35,18 +35,34 @@ func NewMCPServer(featureService domain.FeatureService, formatter domain.Respons
 }
 
 func main() {
+	// Initialize structured logging
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
+	
+	logger.Info("Initializing recent-go-mcp server",
+		"component", "recent-go-mcp",
+		"version", "1.0.0",
+		"architecture", "clean-architecture-with-DI")
+	
 	// Initialize dependencies
 	comparator := version.NewSemanticVersionComparator()
+	logger.Debug("Version comparator initialized")
 	
 	repo, err := storage.NewEmbeddedReleaseRepository(releasesFS, comparator)
 	if err != nil {
-		log.Fatalf("Failed to initialize repository: %v", err)
+		logger.Error("Failed to initialize repository", "error", err)
+		os.Exit(1)
 	}
+	logger.Info("Repository initialized successfully")
 	
 	featureService := service.NewFeatureService(repo, comparator)
 	formatter := service.NewResponseFormatter(comparator)
+	logger.Debug("Services initialized", "services", []string{"featureService", "formatter"})
 	
 	mcpServer := NewMCPServer(featureService, formatter)
+	logger.Info("MCP server wrapper created")
 	
 	// Create MCP server
 	s := server.NewMCPServer("recent-go-mcp", "1.0.0", 
@@ -63,24 +79,32 @@ func main() {
 
 	// Add tool handler
 	s.AddTool(goUpdatesTool, mcpServer.handleGoUpdates)
+	logger.Info("MCP tools registered", "tool", "go-updates")
 
 	// Start server
+	logger.Info("Starting MCP server")
 	if err := server.ServeStdio(s); err != nil {
-		log.Fatal(err)
+		logger.Error("Server failed", "error", err)
+		os.Exit(1)
 	}
 }
 
 func (m *MCPServer) handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	logger := slog.Default()
 	args := request.GetArguments()
+	
+	logger.Debug("Processing go-updates request", "args", args)
 	
 	// Extract version argument (required)
 	versionArg, exists := args["version"]
 	if !exists {
+		logger.Warn("Missing required version argument")
 		return mcp.NewToolResultError("version argument is required"), nil
 	}
 	
 	version, ok := versionArg.(string)
 	if !ok {
+		logger.Warn("Invalid version argument type", "type", typeof(versionArg))
 		return mcp.NewToolResultError("version must be a string"), nil
 	}
 	
@@ -92,30 +116,61 @@ func (m *MCPServer) handleGoUpdates(ctx context.Context, request mcp.CallToolReq
 		}
 	}
 	
-	// Get features using the service
-	response, err := m.featureService.GetFeaturesForVersion(version, packageName)
+	logger.Info("Processing feature request", 
+		"version", version, 
+		"package", packageName,
+		"hasPackageFilter", packageName != "")
+	
+	// Get features using the service with context
+	response, err := m.featureService.GetFeaturesForVersion(ctx, version, packageName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error getting features: %v", err)), nil
+		logger.Error("Failed to get features", 
+			"error", err,
+			"version", version,
+			"package", packageName)
+		
+		// Check if it's a structured error and provide better error messages
+		if domain.IsNotFoundError(err) {
+			return mcp.NewToolResultError("Version not found: " + version), nil
+		}
+		if domain.IsValidationError(err) {
+			return mcp.NewToolResultError("Invalid input: " + err.Error()), nil
+		}
+		
+		return mcp.NewToolResultError("Error getting features: " + err.Error()), nil
 	}
+	
+	logger.Debug("Features retrieved successfully",
+		"changesCount", len(response.Changes),
+		"packagesCount", len(response.PackageInfo))
 	
 	// Format response as JSON
 	responseJSON, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error formatting response: %v", err)), nil
+		logger.Error("Failed to marshal JSON response", "error", err)
+		return mcp.NewToolResultError("Error formatting response: " + err.Error()), nil
 	}
 	
 	// Create detailed text response using formatter
 	textResponse := m.formatter.FormatAsText(response, version, packageName)
 	
+	logger.Info("Request processed successfully",
+		"version", version,
+		"package", packageName,
+		"responseLength", len(textResponse))
+	
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
 			mcp.NewTextContent(textResponse),
-			mcp.NewTextContent(fmt.Sprintf("\n\n--- JSON Response ---\n%s", string(responseJSON))),
+			mcp.NewTextContent("\n\n--- JSON Response ---\n" + string(responseJSON)),
 		},
 	}, nil
 }
 
-func init() {
-	// Log initialization information
-	fmt.Fprintf(os.Stderr, "Initializing recent-go-mcp server with dependency injection architecture\n")
+// typeof returns the type name of a value for logging
+func typeof(v any) string {
+	if v == nil {
+		return "nil"
+	}
+	return reflect.TypeOf(v).String()
 }

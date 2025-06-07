@@ -1,24 +1,26 @@
 package domain
 
+import "context"
+
 // ReleaseRepository handles access to Go release data
 type ReleaseRepository interface {
 	// GetAllReleases returns all available Go releases
 	// Note: Returned pointers should be treated as read-only to maintain data integrity
-	GetAllReleases() ([]*GoRelease, error)
+	GetAllReleases(ctx context.Context) ([]*GoRelease, error)
 	
 	// GetReleaseByVersion returns a specific release by version
 	// Note: Returned pointer should be treated as read-only to maintain data integrity
-	GetReleaseByVersion(version string) (*GoRelease, error)
+	GetReleaseByVersion(ctx context.Context, version string) (*GoRelease, error)
 	
 	// GetReleasesUpToVersion returns all releases from oldest up to the specified version
 	// Note: Returned pointers should be treated as read-only to maintain data integrity
-	GetReleasesUpToVersion(targetVersion string) ([]*GoRelease, error)
+	GetReleasesUpToVersion(ctx context.Context, targetVersion string) ([]*GoRelease, error)
 	
 	// GetOldestVersion returns the oldest available version
-	GetOldestVersion() (string, error)
+	GetOldestVersion(ctx context.Context) (string, error)
 	
 	// GetLatestVersion returns the latest available version
-	GetLatestVersion() (string, error)
+	GetLatestVersion(ctx context.Context) (string, error)
 }
 
 // VersionComparator handles version comparison logic
@@ -31,7 +33,7 @@ type VersionComparator interface {
 // FeatureService provides business logic for feature retrieval
 type FeatureService interface {
 	// GetFeaturesForVersion returns all features available up to the specified version
-	GetFeaturesForVersion(targetVersion string, packageName string) (*FeatureResponse, error)
+	GetFeaturesForVersion(ctx context.Context, targetVersion string, packageName string) (*FeatureResponse, error)
 }
 
 // ResponseFormatter handles formatting of responses
