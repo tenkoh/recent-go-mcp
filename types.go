@@ -1,0 +1,43 @@
+package main
+
+import "time"
+
+// GoRelease represents a Go version release with its updates
+type GoRelease struct {
+	Version     string                     `json:"version"`
+	ReleaseDate time.Time                  `json:"release_date"`
+	Summary     string                     `json:"summary"`
+	Changes     []Change                   `json:"changes"`
+	Packages    map[string][]PackageChange `json:"packages"`
+}
+
+// Change represents a general change in a Go release
+type Change struct {
+	Category    string `json:"category"`    // "language", "runtime", "toolchain", "performance"
+	Description string `json:"description"`
+	Impact      string `json:"impact"`      // "breaking", "enhancement", "deprecation", "new"
+}
+
+// PackageChange represents changes specific to a standard library package
+type PackageChange struct {
+	Function    string `json:"function,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Description string `json:"description"`
+	Impact      string `json:"impact"`
+	Example     string `json:"example,omitempty"`
+}
+
+// UpdateRequest represents the input for the go-updates tool
+type UpdateRequest struct {
+	Version string `json:"version"`
+	Package string `json:"package,omitempty"`
+}
+
+// UpdateResponse represents the response from the go-updates tool
+type UpdateResponse struct {
+	FromVersion string                     `json:"from_version"`
+	ToVersion   string                     `json:"to_version"`
+	Summary     string                     `json:"summary"`
+	Changes     []Change                   `json:"changes"`
+	PackageInfo map[string][]PackageChange `json:"package_info,omitempty"`
+}
