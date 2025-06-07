@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -18,12 +19,12 @@ func main() {
 
 	// Define the go-updates tool
 	goUpdatesTool := mcp.NewTool("go-updates",
-		mcp.WithDescription("Get information about Go language updates and best practices for a specific version. Helps LLM coding agents avoid using outdated Go patterns and leverage new features."),
+		mcp.WithDescription("Get information about Go language features and best practices available in your project's Go version. Shows all features from the oldest supported version up to your current version, helping LLM coding agents use appropriate Go patterns."),
 		mcp.WithString("version", 
 			mcp.Required(),
-			mcp.Description("Go version to check updates from (e.g., '1.21', '1.22', '1.23')")),
+			mcp.Description("Go version your project is currently using (e.g., '1.21', '1.22', '1.23')")),
 		mcp.WithString("package", 
-			mcp.Description("Optional: specific standard library package to get updates for (e.g., 'net/http', 'context')")))
+			mcp.Description("Optional: filter features for a specific standard library package (e.g., 'net/http', 'context')")))
 
 	// Add tool handler
 	s.AddTool(goUpdatesTool, handleGoUpdates)
@@ -56,8 +57,8 @@ func handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 	}
 	
-	// Get updates
-	updates, err := getUpdatesForVersion(version, packageName)
+	// Get features
+	updates, err := getFeaturesForVersion(version, packageName)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error getting updates: %v", err)), nil
 	}
@@ -81,51 +82,75 @@ func handleGoUpdates(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 func formatUpdatesAsText(updates *UpdateResponse, fromVersion, packageName string) string {
 	if len(updates.Changes) == 0 && len(updates.PackageInfo) == 0 {
-		return fmt.Sprintf("✅ Go %s is up to date! No newer releases available.", fromVersion)
+		return fmt.Sprintf("✅ No Go features found for your project (Go %s).", updates.ToVersion)
 	}
 	
-	text := fmt.Sprintf("🔄 **Go Updates from %s to %s**\n\n", fromVersion, updates.ToVersion)
+	text := fmt.Sprintf("🔄 **Go Features Available in Your Project (Go %s)**\n\n", updates.ToVersion)
 	text += fmt.Sprintf("📋 **Summary**: %s\n\n", updates.Summary)
 	
-	if len(updates.Changes) > 0 {
-		text += "## 🚀 **General Changes**\n\n"
-		for _, change := range updates.Changes {
-			icon := getImpactIcon(change.Impact)
-			text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Category, change.Description)
-		}
-		text += "\n"
+	// Get sorted versions for chronological display
+	var versions []string
+	for version := range updates.VersionChanges {
+		versions = append(versions, version)
 	}
+	sort.Strings(versions) // Simple string sort works for our version format
 	
-	if len(updates.PackageInfo) > 0 {
-		if packageName != "" {
-			text += fmt.Sprintf("## 📦 **Package Updates: %s**\n\n", packageName)
-		} else {
-			text += "## 📦 **Package Updates**\n\n"
+	// Display features by version (oldest to newest)
+	for _, version := range versions {
+		versionChanges := updates.VersionChanges[version]
+		versionPackages := updates.VersionPackages[version]
+		
+		// Skip if no relevant changes for this version
+		if len(versionChanges) == 0 && len(versionPackages) == 0 {
+			continue
 		}
 		
-		for pkg, changes := range updates.PackageInfo {
-			if packageName == "" {
-				text += fmt.Sprintf("### `%s`\n", pkg)
-			}
-			
-			for _, change := range changes {
+		text += fmt.Sprintf("## 📦 **Go %s Features**\n\n", version)
+		
+		// Show general changes for this version
+		if len(versionChanges) > 0 {
+			text += "### 🚀 **Language & Runtime Changes**\n"
+			for _, change := range versionChanges {
 				icon := getImpactIcon(change.Impact)
-				if change.Function != "" {
-					text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Function, change.Description)
-				} else {
-					text += fmt.Sprintf("- %s %s\n", icon, change.Description)
-				}
-				
-				if change.Example != "" {
-					text += fmt.Sprintf("  ```go\n  %s\n  ```\n", change.Example)
-				}
+				text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Category, change.Description)
 			}
 			text += "\n"
 		}
+		
+		// Show package changes for this version
+		if len(versionPackages) > 0 {
+			text += "### 📚 **Standard Library Updates**\n"
+			
+			for pkg, changes := range versionPackages {
+				if packageName != "" && pkg != packageName {
+					continue // Skip if filtering for specific package
+				}
+				
+				if packageName == "" {
+					text += fmt.Sprintf("#### `%s`\n", pkg)
+				}
+				
+				for _, change := range changes {
+					icon := getImpactIcon(change.Impact)
+					if change.Function != "" {
+						text += fmt.Sprintf("- %s **%s**: %s\n", icon, change.Function, change.Description)
+					} else {
+						text += fmt.Sprintf("- %s %s\n", icon, change.Description)
+					}
+					
+					if change.Example != "" {
+						text += fmt.Sprintf("  ```go\n  %s\n  ```\n", change.Example)
+					}
+				}
+				text += "\n"
+			}
+		}
+		
+		text += "\n"
 	}
 	
 	text += "---\n"
-	text += "💡 **Tip**: Use these updates to modernize your code and leverage the latest Go features!\n"
+	text += "💡 **Tip**: These are all the Go features available in your project version. Use them to write modern, efficient Go code!\n"
 	
 	return text
 }

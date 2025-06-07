@@ -35,9 +35,12 @@ type UpdateRequest struct {
 
 // UpdateResponse represents the response from the go-updates tool
 type UpdateResponse struct {
-	FromVersion string                     `json:"from_version"`
-	ToVersion   string                     `json:"to_version"`
-	Summary     string                     `json:"summary"`
-	Changes     []Change                   `json:"changes"`
-	PackageInfo map[string][]PackageChange `json:"package_info,omitempty"`
+	FromVersion     string                                    `json:"from_version"`
+	ToVersion       string                                    `json:"to_version"`
+	Summary         string                                    `json:"summary"`
+	Changes         []Change                                  `json:"changes"`
+	PackageInfo     map[string][]PackageChange                `json:"package_info,omitempty"`
+	// Version-specific data for formatted output
+	VersionChanges  map[string][]Change                       `json:"-"`
+	VersionPackages map[string]map[string][]PackageChange     `json:"-"`
 }

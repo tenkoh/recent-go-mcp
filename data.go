@@ -71,71 +71,108 @@ func compareVersions(v1, v2 string) int {
 	return 0
 }
 
-// getUpdatesForVersion returns all changes from the specified version to the latest
-func getUpdatesForVersion(targetVersion string, packageName string) (*UpdateResponse, error) {
-	var fromRelease *GoRelease
-	var relevantReleases []GoRelease
+// getFeaturesForVersion returns all features available from the oldest version up to the specified version
+func getFeaturesForVersion(targetVersion string, packageName string) (*UpdateResponse, error) {
+	var targetRelease *GoRelease
+	var availableReleases []GoRelease
 	
-	// Find the target version and collect all newer releases
+	// Find the target version
 	for _, release := range goReleases {
-		if compareVersions(release.Version, targetVersion) > 0 {
-			relevantReleases = append(relevantReleases, release)
-		} else if release.Version == targetVersion {
-			fromRelease = &release
+		if release.Version == targetVersion {
+			targetRelease = &release
 			break
 		}
 	}
 	
-	if fromRelease == nil {
+	if targetRelease == nil {
 		return nil, fmt.Errorf("version %s not found", targetVersion)
 	}
 	
-	if len(relevantReleases) == 0 {
-		return &UpdateResponse{
-			FromVersion: targetVersion,
-			ToVersion:   targetVersion,
-			Summary:     "No updates available - you're using the latest version!",
-			Changes:     []Change{},
-		}, nil
+	// Collect all releases from oldest to target version (inclusive)
+	for _, release := range goReleases {
+		if compareVersions(release.Version, targetVersion) <= 0 {
+			availableReleases = append(availableReleases, release)
+		}
 	}
+	
+	// Sort releases from oldest to newest
+	sort.Slice(availableReleases, func(i, j int) bool {
+		return compareVersions(availableReleases[i].Version, availableReleases[j].Version) < 0
+	})
+	
+	if len(availableReleases) == 0 {
+		return nil, fmt.Errorf("no releases found up to version %s", targetVersion)
+	}
+	
+	// Find oldest version
+	oldestVersion := availableReleases[0].Version
 	
 	// Build response
 	response := &UpdateResponse{
-		FromVersion: targetVersion,
-		ToVersion:   relevantReleases[0].Version, // Latest version
+		FromVersion: oldestVersion,
+		ToVersion:   targetVersion,
 		Changes:     []Change{},
 		PackageInfo: make(map[string][]PackageChange),
 	}
 	
-	// Collect all changes from newer releases
-	for _, release := range relevantReleases {
-		response.Changes = append(response.Changes, release.Changes...)
+	// Collect all changes from available releases
+	allChanges := make(map[string][]Change)
+	allPackageInfo := make(map[string]map[string][]PackageChange)
+	
+	for _, release := range availableReleases {
+		// Group changes by version
+		allChanges[release.Version] = release.Changes
 		
-		// If specific package requested, filter package changes
+		// Group package changes by version
+		allPackageInfo[release.Version] = make(map[string][]PackageChange)
+		
 		if packageName != "" {
+			// Filter for specific package
 			if pkgChanges, exists := release.Packages[packageName]; exists {
-				response.PackageInfo[packageName] = append(response.PackageInfo[packageName], pkgChanges...)
+				allPackageInfo[release.Version][packageName] = pkgChanges
 			}
 		} else {
-			// Include all package changes
+			// Include all packages
 			for pkg, changes := range release.Packages {
-				response.PackageInfo[pkg] = append(response.PackageInfo[pkg], changes...)
+				allPackageInfo[release.Version][pkg] = changes
 			}
 		}
 	}
 	
+	// Store structured data for formatted output
+	response.Changes = []Change{} // Will be used for JSON, but formatted text will be different
+	response.PackageInfo = make(map[string][]PackageChange)
+	
+	// Flatten for JSON response
+	for _, versionChanges := range allChanges {
+		response.Changes = append(response.Changes, versionChanges...)
+	}
+	
+	for _, versionPackages := range allPackageInfo {
+		for pkg, changes := range versionPackages {
+			response.PackageInfo[pkg] = append(response.PackageInfo[pkg], changes...)
+		}
+	}
+	
+	// Store version-specific data for formatted output
+	response.VersionChanges = allChanges
+	response.VersionPackages = allPackageInfo
+	
 	// Generate summary
+	totalChanges := len(response.Changes)
+	totalPackages := len(response.PackageInfo)
+	
 	if packageName != "" {
-		if len(response.PackageInfo[packageName]) > 0 {
-			response.Summary = fmt.Sprintf("Found %d updates for package '%s' from Go %s to %s",
-				len(response.PackageInfo[packageName]), packageName, targetVersion, response.ToVersion)
+		if totalPackages > 0 {
+			response.Summary = fmt.Sprintf("Features available for package '%s' in your Go %s project (from Go %s)",
+				packageName, targetVersion, oldestVersion)
 		} else {
-			response.Summary = fmt.Sprintf("No updates found for package '%s' from Go %s to %s",
-				packageName, targetVersion, response.ToVersion)
+			response.Summary = fmt.Sprintf("No features found for package '%s' in your Go %s project",
+				packageName, targetVersion)
 		}
 	} else {
-		response.Summary = fmt.Sprintf("Found %d general changes and %d package updates from Go %s to %s",
-			len(response.Changes), len(response.PackageInfo), targetVersion, response.ToVersion)
+		response.Summary = fmt.Sprintf("All Go features available in your project (Go %s): %d changes across %d packages from Go %s",
+			targetVersion, totalChanges, totalPackages, oldestVersion)
 	}
 	
 	return response, nil
