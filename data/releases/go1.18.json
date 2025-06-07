@@ -1,0 +1,201 @@
+{
+  "version": "1.18",
+  "release_date": "2022-03-15T00:00:00Z",
+  "summary": "Go 1.18 introduces revolutionary generics support, fuzzing testing, workspace mode, and new netip package for high-performance networking.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Generics: type parameters for functions and types enabling type-safe generic programming",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Type constraints: new ~ token for approximate type constraints in generics",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Predeclared identifiers: any (alias for interface{}) and comparable constraint added",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Register-based argument passing: expanded to ARM64 and PowerPC for ~5% performance improvement",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Garbage collector improvements: more predictable behavior with non-heap work sources",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Memory return optimization: more efficient memory return to operating system",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Fuzzing support: native fuzz testing with go test -fuzz for automated testing",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Workspace mode: multi-module development with go.work files",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Build information embedding: enhanced build metadata in binaries",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "Compile time increase: ~15% slower compilation due to generics implementation",
+      "impact": "performance"
+    },
+    {
+      "category": "platform",
+      "description": "TLS 1.0 and 1.1 disabled by default for enhanced security",
+      "impact": "breaking"
+    }
+  ],
+  "packages": {
+    "builtin": [
+      {
+        "function": "any",
+        "description": "New predeclared identifier as alias for interface{} - simplifies generic constraints",
+        "impact": "new",
+        "example": "func Print[T any](value T) { fmt.Println(value) }"
+      },
+      {
+        "function": "comparable",
+        "description": "New predeclared constraint for types that support == and != operators",
+        "impact": "new",
+        "example": "func Contains[T comparable](slice []T, item T) bool { ... }"
+      }
+    ],
+    "net/netip": [
+      {
+        "description": "New package providing efficient, comparable IP address types",
+        "impact": "new",
+        "example": "// High-performance IP address handling with zero allocations"
+      },
+      {
+        "function": "Addr",
+        "description": "IP address type that's comparable and memory-efficient",
+        "impact": "new",
+        "example": "addr := netip.MustParseAddr(\"192.168.1.1\")\nif addr.Is4() { ... }"
+      },
+      {
+        "function": "AddrPort",
+        "description": "IP address and port combination type",
+        "impact": "new",
+        "example": "addrPort := netip.MustParseAddrPort(\"192.168.1.1:8080\")"
+      },
+      {
+        "function": "Prefix",
+        "description": "IP address prefix (CIDR) type for network calculations",
+        "impact": "new",
+        "example": "prefix := netip.MustParsePrefix(\"192.168.1.0/24\")"
+      },
+      {
+        "function": "ParseAddr",
+        "description": "Parses string into Addr type with error handling",
+        "impact": "new",
+        "example": "addr, err := netip.ParseAddr(\"2001:db8::1\")"
+      }
+    ],
+    "debug/buildinfo": [
+      {
+        "description": "New package for accessing build information embedded in Go binaries",
+        "impact": "new",
+        "example": "// Read build information from executables and libraries"
+      },
+      {
+        "function": "ReadFile",
+        "description": "Reads build information from a Go binary file",
+        "impact": "new",
+        "example": "info, err := buildinfo.ReadFile(\"myprogram\")"
+      },
+      {
+        "function": "Read",
+        "description": "Reads build information from an io.ReaderAt",
+        "impact": "new",
+        "example": "info, err := buildinfo.Read(reader)"
+      }
+    ],
+    "testing": [
+      {
+        "function": "F.Fuzz",
+        "description": "New fuzzing support for property-based testing with random inputs",
+        "impact": "new",
+        "example": "func FuzzReverse(f *testing.F) {\n    f.Fuzz(func(t *testing.T, s string) {\n        // Test reverse function\n    })\n}"
+      },
+      {
+        "function": "F.Add",
+        "description": "Adds seed inputs for fuzz testing",
+        "impact": "new",
+        "example": "f.Add(\"hello\")\nf.Add(\"world\")"
+      }
+    ],
+    "crypto/elliptic": [
+      {
+        "description": "Performance improvements for elliptic curve cryptography operations",
+        "impact": "performance",
+        "example": "// Faster P-256, P-384, and P-521 operations"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "description": "Disabled TLS 1.0 and 1.1 by default for client connections",
+        "impact": "breaking",
+        "example": "// Use MinVersion: tls.VersionTLS12 explicitly for older protocol support"
+      },
+      {
+        "description": "Rejection of SHA-1 based certificates for enhanced security",
+        "impact": "breaking",
+        "example": "// SHA-1 certificates no longer accepted"
+      }
+    ],
+    "runtime": [
+      {
+        "description": "Slice growth optimization: improved append performance with better growth formula",
+        "impact": "performance",
+        "example": "// More efficient slice capacity growth"
+      }
+    ],
+    "strings": [
+      {
+        "description": "Performance improvements for string manipulation functions",
+        "impact": "performance",
+        "example": "// Faster strings.Cut, strings.Clone operations"
+      },
+      {
+        "function": "Cut",
+        "description": "Cuts string around first instance of separator",
+        "impact": "new",
+        "example": "before, after, found := strings.Cut(\"key=value\", \"=\")"
+      },
+      {
+        "function": "Clone",
+        "description": "Returns fresh copy of string to avoid memory retention",
+        "impact": "new",
+        "example": "copy := strings.Clone(original)"
+      }
+    ],
+    "bytes": [
+      {
+        "function": "Cut",
+        "description": "Cuts byte slice around first instance of separator",
+        "impact": "new",
+        "example": "before, after, found := bytes.Cut(data, []byte(\"=\"))"
+      },
+      {
+        "function": "Clone",
+        "description": "Returns fresh copy of byte slice",
+        "impact": "new",
+        "example": "copy := bytes.Clone(original)"
+      }
+    ]
+  }
+}

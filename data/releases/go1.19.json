@@ -1,0 +1,169 @@
+{
+  "version": "1.19",
+  "release_date": "2022-08-02T00:00:00Z",
+  "summary": "Go 1.19 introduces soft memory limits, atomic types, revised memory model, and significant performance improvements for switch statements and GC.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Scope of type parameters correction: refined method declaration scoping rules",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Soft memory limit support: GOMEMLIMIT environment variable and SetMemoryLimit function prevent out-of-memory crashes",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "GC CPU utilization limit: garbage collector now limits total CPU usage to 50% to prevent thrashing",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Goroutine stack allocation optimization: uses historic average for better memory management",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Automatic file descriptor limit increase on Unix systems for better resource management",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Revised memory model: aligned with C, C++, Java for better multi-language interoperability",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "Jump table implementation: up to 20% faster switch statement performance",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Enhanced doc comment support: links, lists, and clearer headings in documentation",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "LoongArch 64-bit architecture support added",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "RISC-V performance improvements and optimizations",
+      "impact": "performance"
+    }
+  ],
+  "packages": {
+    "sync/atomic": [
+      {
+        "function": "Bool",
+        "description": "New atomic boolean type with Load, Store, Swap, and CompareAndSwap methods",
+        "impact": "new",
+        "example": "var flag atomic.Bool\nflag.Store(true)\nif flag.Load() { ... }"
+      },
+      {
+        "function": "Int32",
+        "description": "New atomic int32 type with arithmetic and comparison operations",
+        "impact": "new",
+        "example": "var counter atomic.Int32\ncounter.Add(1)\nvalue := counter.Load()"
+      },
+      {
+        "function": "Int64",
+        "description": "New atomic int64 type with arithmetic and comparison operations",
+        "impact": "new",
+        "example": "var counter atomic.Int64\ncounter.Add(1)\nvalue := counter.Load()"
+      },
+      {
+        "function": "Uint32",
+        "description": "New atomic uint32 type with arithmetic operations",
+        "impact": "new",
+        "example": "var counter atomic.Uint32\ncounter.Add(1)\nvalue := counter.Load()"
+      },
+      {
+        "function": "Uint64",
+        "description": "New atomic uint64 type with arithmetic operations",
+        "impact": "new",
+        "example": "var counter atomic.Uint64\ncounter.Add(1)\nvalue := counter.Load()"
+      },
+      {
+        "function": "Uintptr",
+        "description": "New atomic uintptr type for pointer arithmetic",
+        "impact": "new",
+        "example": "var ptr atomic.Uintptr\nptr.Store(uintptr(unsafe.Pointer(&data)))"
+      },
+      {
+        "function": "Pointer",
+        "description": "New atomic pointer type for safe concurrent pointer operations",
+        "impact": "new",
+        "example": "var ptr atomic.Pointer[int]\nptr.Store(&value)\nloaded := ptr.Load()"
+      }
+    ],
+    "runtime/debug": [
+      {
+        "function": "SetMemoryLimit",
+        "description": "Sets soft memory limit to prevent out-of-memory crashes",
+        "impact": "new",
+        "example": "debug.SetMemoryLimit(1 << 30) // 1GB limit\n// Or use GOMEMLIMIT=1GiB environment variable"
+      }
+    ],
+    "net/url": [
+      {
+        "function": "JoinPath",
+        "description": "Joins URL path elements with proper escaping",
+        "impact": "new",
+        "example": "result := url.JoinPath(\"https://example.com\", \"path\", \"to\", \"resource\")"
+      }
+    ],
+    "time": [
+      {
+        "function": "Duration.Abs",
+        "description": "Returns absolute value of duration",
+        "impact": "new",
+        "example": "absDuration := duration.Abs()"
+      }
+    ],
+    "reflect": [
+      {
+        "function": "ValueOf.SetIterKey",
+        "description": "Sets reflect.Value to the key of a map iterator",
+        "impact": "new",
+        "example": "// Enhanced map iteration with reflection"
+      },
+      {
+        "function": "ValueOf.SetIterValue", 
+        "description": "Sets reflect.Value to the value of a map iterator",
+        "impact": "new",
+        "example": "// Enhanced map iteration with reflection"
+      }
+    ],
+    "crypto/elliptic": [
+      {
+        "description": "Performance improvements for elliptic curve operations",
+        "impact": "performance",
+        "example": "// Faster P-256, P-384, and P-521 curve operations"
+      }
+    ],
+    "sort": [
+      {
+        "description": "Improved sorting algorithm with pattern-defeating quicksort",
+        "impact": "performance",
+        "example": "// Faster and more stable sorting performance"
+      }
+    ],
+    "fmt": [
+      {
+        "description": "Performance improvements in formatting operations",
+        "impact": "performance",
+        "example": "// Faster Printf and related formatting functions"
+      }
+    ],
+    "strconv": [
+      {
+        "description": "Enhanced parsing performance for numeric conversions",
+        "impact": "performance",
+        "example": "// Faster Atoi, ParseInt, and ParseFloat operations"
+      }
+    ]
+  }
+}

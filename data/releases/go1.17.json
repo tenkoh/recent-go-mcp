@@ -1,0 +1,188 @@
+{
+  "version": "1.17",
+  "release_date": "2021-08-16T00:00:00Z",
+  "summary": "Go 1.17 introduces register-based calling convention, slice-to-array pointer conversions, runtime metrics, and major performance improvements.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Slice to array pointer conversion: convert []T to *[N]T with runtime bounds checking",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "unsafe.Add function: pointer arithmetic for unsafe.Pointer",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "unsafe.Slice function: converts pointer and length to slice",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Register-based argument passing: ~5% performance improvement and ~2% binary size reduction",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Function call inlining: closures can now be inlined for better performance",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Enhanced stack trace formatting with improved readability",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "Module dependency pruning: faster builds with reduced module graph",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Enhanced linker efficiency with fewer relocations",
+      "impact": "performance"
+    },
+    {
+      "category": "platform",
+      "description": "Windows ARM64 support: native 64-bit ARM support on Windows",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "ARM64 stack frame pointer maintenance across more operating systems",
+      "impact": "enhancement"
+    }
+  ],
+  "packages": {
+    "unsafe": [
+      {
+        "function": "Add",
+        "description": "Adds offset to unsafe.Pointer for pointer arithmetic",
+        "impact": "new",
+        "example": "newPtr := unsafe.Add(ptr, offset)"
+      },
+      {
+        "function": "Slice",
+        "description": "Creates slice from pointer and length - enables low-level slice construction",
+        "impact": "new",
+        "example": "slice := unsafe.Slice((*int)(ptr), length)"
+      }
+    ],
+    "runtime/metrics": [
+      {
+        "description": "New package providing access to implementation-defined runtime metrics",
+        "impact": "new",
+        "example": "// Monitor memory allocations, GC behavior, goroutine scheduling"
+      },
+      {
+        "function": "All",
+        "description": "Returns descriptions of all supported runtime metrics",
+        "impact": "new",
+        "example": "descriptions := metrics.All()\nfor _, desc := range descriptions { ... }"
+      },
+      {
+        "function": "Read",
+        "description": "Reads runtime metrics by name into provided slice",
+        "impact": "new",
+        "example": "samples := make([]metrics.Sample, len(names))\nmetrics.Read(samples)"
+      }
+    ],
+    "crypto/ed25519": [
+      {
+        "description": "Performance improvements: ~2x faster operations on amd64 and arm64",
+        "impact": "performance",
+        "example": "// Significantly faster signing and verification"
+      }
+    ],
+    "strconv": [
+      {
+        "description": "Ryū algorithm implementation for faster floating-point formatting",
+        "impact": "performance",
+        "example": "// Much faster FormatFloat operations"
+      },
+      {
+        "function": "QuoteToGraphic",
+        "description": "Quotes string ensuring all characters are graphic Unicode characters",
+        "impact": "new",
+        "example": "quoted := strconv.QuoteToGraphic(\"hello\\tworld\")"
+      }
+    ],
+    "crypto/elliptic": [
+      {
+        "description": "Improved elliptic curve implementations with better performance",
+        "impact": "performance",
+        "example": "// Faster P-256, P-384, and P-521 curve operations"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "function": "Conn.HandshakeContext",
+        "description": "Performs TLS handshake with context for cancellation and timeouts",
+        "impact": "new",
+        "example": "err := conn.HandshakeContext(ctx)"
+      },
+      {
+        "description": "Enhanced certificate validation and security improvements",
+        "impact": "enhancement",
+        "example": "// Stricter certificate chain validation"
+      }
+    ],
+    "net/http": [
+      {
+        "description": "Stricter URL query parsing for improved security",
+        "impact": "breaking",
+        "example": "// Invalid query strings now properly rejected"
+      },
+      {
+        "function": "MaxBytesHandler",
+        "description": "Wraps handler to limit request body size",
+        "impact": "new",
+        "example": "handler := http.MaxBytesHandler(originalHandler, 1048576) // 1MB limit"
+      }
+    ],
+    "time": [
+      {
+        "function": "Time.GoString",
+        "description": "Returns Go syntax representation of time value",
+        "impact": "new",
+        "example": "goRepr := t.GoString() // time.Date(2021, 1, 1, ...)"
+      },
+      {
+        "function": "Time.IsDST",
+        "description": "Reports whether time is in Daylight Saving Time",
+        "impact": "new",
+        "example": "isDST := t.IsDST()"
+      }
+    ],
+    "reflect": [
+      {
+        "function": "VisibleFields",
+        "description": "Returns visible fields of struct type for reflection",
+        "impact": "new",
+        "example": "fields := reflect.VisibleFields(structType)"
+      }
+    ],
+    "sync/atomic": [
+      {
+        "function": "Value.Swap",
+        "description": "Atomically swaps value and returns previous value",
+        "impact": "new",
+        "example": "old := atomicValue.Swap(newValue)"
+      },
+      {
+        "function": "Value.CompareAndSwap",
+        "description": "Atomically compares and swaps value if equal to old value",
+        "impact": "new",
+        "example": "swapped := atomicValue.CompareAndSwap(old, new)"
+      }
+    ],
+    "compress/lzw": [
+      {
+        "description": "Performance improvements in LZW compression/decompression",
+        "impact": "performance",
+        "example": "// Faster compression and decompression operations"
+      }
+    ]
+  }
+}
