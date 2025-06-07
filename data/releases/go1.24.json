@@ -1,0 +1,203 @@
+{
+  "version": "1.24",
+  "release_date": "2025-02-01T00:00:00Z",
+  "summary": "Go 1.24 introduces generic type aliases, post-quantum cryptography, Swiss Tables map implementation, and weak pointer primitives for advanced memory management.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Generic type aliases: full support for parameterized type aliases like defined types",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Swiss Tables map implementation: new high-performance map implementation reducing memory overhead",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "CPU performance improvements: 2-3% reduction in runtime overhead through optimized allocator",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Small object allocation optimization: more efficient memory allocation for small objects",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "New runtime-internal mutex implementation for improved synchronization performance",
+      "impact": "performance"
+    },
+    {
+      "category": "toolchain",
+      "description": "Go modules executable dependency tracking: modules can now track and manage executable dependencies",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Build output JSON format: new -json flag for machine-readable build output",
+      "impact": "new"
+    },
+    {
+      "category": "platform",
+      "description": "32-bit Windows ARM port marked as broken and deprecated",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "SHA-1 based signatures removed from crypto packages for enhanced security",
+      "impact": "breaking"
+    }
+  ],
+  "packages": {
+    "crypto/mlkem": [
+      {
+        "description": "New post-quantum key encapsulation mechanism implementing ML-KEM (Kyber) NIST FIPS 203",
+        "impact": "new",
+        "example": "// Quantum-resistant key exchange for future cryptographic security"
+      },
+      {
+        "function": "GenerateKey768",
+        "description": "Generates ML-KEM-768 decapsulation key (recommended parameter set)",
+        "impact": "new",
+        "example": "dk, err := mlkem.GenerateKey768()\nif err != nil { ... }"
+      },
+      {
+        "function": "GenerateKey1024",
+        "description": "Generates ML-KEM-1024 decapsulation key for higher security level",
+        "impact": "new",
+        "example": "dk, err := mlkem.GenerateKey1024()\nif err != nil { ... }"
+      },
+      {
+        "function": "DecapsulationKey.Decapsulate",
+        "description": "Decapsulates shared secret from ciphertext using private key",
+        "impact": "new",
+        "example": "sharedSecret, err := dk.Decapsulate(ciphertext)"
+      },
+      {
+        "function": "EncapsulationKey.Encapsulate",
+        "description": "Encapsulates shared secret and returns ciphertext using public key",
+        "impact": "new",
+        "example": "ciphertext, sharedSecret, err := ek.Encapsulate()"
+      }
+    ],
+    "weak": [
+      {
+        "description": "New package for weak pointer primitives enabling advanced memory management patterns",
+        "impact": "new",
+        "example": "// Create weak references without preventing garbage collection"
+      },
+      {
+        "function": "Make",
+        "description": "Creates weak pointer from regular pointer that doesn't prevent GC",
+        "impact": "new",
+        "example": "weakPtr := weak.Make(ptr)\n// Object can be garbage collected"
+      },
+      {
+        "function": "Pointer.Value",
+        "description": "Returns original pointer or nil if object was garbage collected",
+        "impact": "new",
+        "example": "if obj := weakPtr.Value(); obj != nil {\n    // Object still alive\n}"
+      }
+    ],
+    "crypto/hkdf": [
+      {
+        "description": "New HMAC-based Key Derivation Function (HKDF) implementation per RFC 5869",
+        "impact": "new",
+        "example": "// Secure key derivation from shared secrets"
+      },
+      {
+        "function": "New",
+        "description": "Creates new HKDF key derivation function with specified hash and salt",
+        "impact": "new",
+        "example": "kdf := hkdf.New(sha256.New, secret, salt, info)"
+      },
+      {
+        "function": "Expand",
+        "description": "Expands pseudorandom key to specified length",
+        "impact": "new",
+        "example": "key := make([]byte, 32)\nkdf.Read(key)"
+      }
+    ],
+    "crypto/pbkdf2": [
+      {
+        "description": "New Password-Based Key Derivation Function 2 (PBKDF2) implementation",
+        "impact": "new",
+        "example": "// Secure password hashing and key derivation"
+      },
+      {
+        "function": "Key",
+        "description": "Derives key from password using PBKDF2 with specified parameters",
+        "impact": "new",
+        "example": "key := pbkdf2.Key(password, salt, 10000, 32, sha256.New)"
+      }
+    ],
+    "crypto/sha3": [
+      {
+        "description": "New SHA-3 hash function family implementation per NIST FIPS 202",
+        "impact": "new",
+        "example": "// Keccak-based cryptographic hash functions"
+      },
+      {
+        "function": "New224",
+        "description": "Creates new SHA3-224 hash function",
+        "impact": "new",
+        "example": "h := sha3.New224()\nh.Write(data)\nhash := h.Sum(nil)"
+      },
+      {
+        "function": "New256",
+        "description": "Creates new SHA3-256 hash function",
+        "impact": "new",
+        "example": "h := sha3.New256()\nh.Write(data)\nhash := h.Sum(nil)"
+      },
+      {
+        "function": "New384",
+        "description": "Creates new SHA3-384 hash function",
+        "impact": "new",
+        "example": "h := sha3.New384()\nh.Write(data)\nhash := h.Sum(nil)"
+      },
+      {
+        "function": "New512",
+        "description": "Creates new SHA3-512 hash function",
+        "impact": "new",
+        "example": "h := sha3.New512()\nh.Write(data)\nhash := h.Sum(nil)"
+      }
+    ],
+    "testing/synctest": [
+      {
+        "description": "New experimental package for testing concurrent code with deterministic execution",
+        "impact": "new",
+        "example": "// Provides utilities for testing race conditions and concurrent behavior"
+      },
+      {
+        "function": "Run",
+        "description": "Runs test function in controlled concurrent environment",
+        "impact": "new",
+        "example": "synctest.Run(func() {\n    // Test concurrent code here\n})"
+      }
+    ],
+    "sync": [
+      {
+        "function": "Map",
+        "description": "Improved implementation with better performance for concurrent access patterns",
+        "impact": "performance",
+        "example": "// Enhanced sync.Map with reduced lock contention"
+      }
+    ],
+    "math/rand": [
+      {
+        "function": "Seed",
+        "description": "Top-level Seed function deprecated in favor of rand/v2 package",
+        "impact": "deprecation",
+        "example": "// Use math/rand/v2 for new code instead"
+      }
+    ],
+    "runtime": [
+      {
+        "description": "WebAssembly cryptographic operations performance improvements",
+        "impact": "performance",
+        "example": "// Faster public/private key operations on WASM targets"
+      }
+    ]
+  }
+}
