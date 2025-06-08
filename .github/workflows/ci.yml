@@ -2,7 +2,7 @@ name: Go Format Check
 on: [push, pull_request]
 
 jobs:
-  checks and tests:
+  checks_and_tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
