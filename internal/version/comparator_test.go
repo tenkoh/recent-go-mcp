@@ -4,7 +4,7 @@ import "testing"
 
 func TestGoVersionComparator_Compare(t *testing.T) {
 	comparator := NewSemanticVersionComparator()
-	
+
 	tests := []struct {
 		name     string
 		v1       string
@@ -78,7 +78,7 @@ func TestGoVersionComparator_Compare(t *testing.T) {
 			expected: 1,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := comparator.Compare(tt.v1, tt.v2)
@@ -126,7 +126,7 @@ func TestNormalizeGoVersion(t *testing.T) {
 			expected: "go2",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := normalizeGoVersion(tt.input)

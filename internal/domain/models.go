@@ -13,9 +13,9 @@ type GoRelease struct {
 
 // Change represents a general change in a Go release
 type Change struct {
-	Category    string `json:"category"`    // "language", "runtime", "toolchain", "performance"
+	Category    string `json:"category"` // "language", "runtime", "toolchain", "performance"
 	Description string `json:"description"`
-	Impact      string `json:"impact"`      // "breaking", "enhancement", "deprecation", "new"
+	Impact      string `json:"impact"` // "breaking", "enhancement", "deprecation", "new"
 }
 
 // PackageChange represents changes specific to a standard library package
@@ -29,12 +29,12 @@ type PackageChange struct {
 
 // FeatureResponse represents the response containing features available up to a version
 type FeatureResponse struct {
-	FromVersion     string                                    `json:"from_version"`
-	ToVersion       string                                    `json:"to_version"`
-	Summary         string                                    `json:"summary"`
-	Changes         []Change                                  `json:"changes"`
-	PackageInfo     map[string][]PackageChange                `json:"package_info,omitempty"`
+	FromVersion string                     `json:"from_version"`
+	ToVersion   string                     `json:"to_version"`
+	Summary     string                     `json:"summary"`
+	Changes     []Change                   `json:"changes"`
+	PackageInfo map[string][]PackageChange `json:"package_info,omitempty"`
 	// Version-specific data for formatted output
-	VersionChanges  map[string][]Change                       `json:"-"`
-	VersionPackages map[string]map[string][]PackageChange     `json:"-"`
+	VersionChanges  map[string][]Change                   `json:"-"`
+	VersionPackages map[string]map[string][]PackageChange `json:"-"`
 }

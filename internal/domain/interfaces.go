@@ -7,18 +7,18 @@ type ReleaseRepository interface {
 	// GetAllReleases returns all available Go releases
 	// Note: Returned pointers should be treated as read-only to maintain data integrity
 	GetAllReleases(ctx context.Context) ([]*GoRelease, error)
-	
+
 	// GetReleaseByVersion returns a specific release by version
 	// Note: Returned pointer should be treated as read-only to maintain data integrity
 	GetReleaseByVersion(ctx context.Context, version string) (*GoRelease, error)
-	
+
 	// GetReleasesUpToVersion returns all releases from oldest up to the specified version
 	// Note: Returned pointers should be treated as read-only to maintain data integrity
 	GetReleasesUpToVersion(ctx context.Context, targetVersion string) ([]*GoRelease, error)
-	
+
 	// GetOldestVersion returns the oldest available version
 	GetOldestVersion(ctx context.Context) (string, error)
-	
+
 	// GetLatestVersion returns the latest available version
 	GetLatestVersion(ctx context.Context) (string, error)
 }

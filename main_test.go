@@ -16,11 +16,11 @@ func TestMCPServer_GoUpdates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create MCP server: %v", err)
 	}
-	
+
 	// Create test server using the MCP library's testing utilities
 	testServer := server.NewTestServer(mcpServer)
 	defer testServer.Close()
-	
+
 	// Test that the server was created successfully and tools are registered
 	t.Run("test server creation and tool registration", func(t *testing.T) {
 		if testServer == nil {
@@ -36,15 +36,15 @@ func TestMCPServer_GoUpdates(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create in-process client: %v", err)
 		}
-		
+
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		// Start the client transport
 		if err := cli.Start(ctx); err != nil {
 			t.Fatalf("Failed to start client: %v", err)
 		}
-		
+
 		// Initialize client with proper request
 		initReq := mcp.InitializeRequest{
 			Params: mcp.InitializeParams{
@@ -61,7 +61,7 @@ func TestMCPServer_GoUpdates(t *testing.T) {
 			t.Fatalf("Failed to initialize client: %v", err)
 		}
 		defer cli.Close()
-		
+
 		// Call the go-updates tool with proper request
 		toolReq := mcp.CallToolRequest{
 			Params: mcp.CallToolParams{
@@ -71,20 +71,20 @@ func TestMCPServer_GoUpdates(t *testing.T) {
 				},
 			},
 		}
-		
+
 		result, err := cli.CallTool(ctx, toolReq)
 		if err != nil {
 			t.Fatalf("Failed to call go-updates tool: %v", err)
 		}
-		
+
 		if result == nil {
 			t.Fatal("Expected result, got nil")
 		}
-		
+
 		if len(result.Content) == 0 {
 			t.Fatal("Expected content in result")
 		}
-		
+
 		// Verify we got some content (simplified check)
 		if len(result.Content) < 1 {
 			t.Fatal("Expected at least one content item")

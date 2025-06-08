@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	
+
 	"github.com/tenkoh/recent-go-mcp/internal/domain"
 )
 
@@ -110,42 +110,42 @@ func TestDefaultFeatureService_GetFeaturesForVersion(t *testing.T) {
 			},
 		},
 	}
-	
+
 	repo := &mockRepository{releases: testReleases}
 	comparator := &mockComparator{}
 	service := NewFeatureService(repo, comparator)
-	
+
 	t.Run("successful feature retrieval", func(t *testing.T) {
 		ctx := context.Background()
 		response, err := service.GetFeaturesForVersion(ctx, "1.22", "")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if response.ToVersion != "1.22" {
 			t.Errorf("expected ToVersion 1.22, got %s", response.ToVersion)
 		}
-		
+
 		if len(response.Changes) != 2 {
 			t.Errorf("expected 2 changes, got %d", len(response.Changes))
 		}
-		
+
 		if len(response.PackageInfo) != 2 {
 			t.Errorf("expected 2 packages, got %d", len(response.PackageInfo))
 		}
 	})
-	
+
 	t.Run("package filtering", func(t *testing.T) {
 		ctx := context.Background()
 		response, err := service.GetFeaturesForVersion(ctx, "1.22", "net/http")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if len(response.PackageInfo) != 1 {
 			t.Errorf("expected 1 package after filtering, got %d", len(response.PackageInfo))
 		}
-		
+
 		if _, exists := response.PackageInfo["net/http"]; !exists {
 			t.Error("expected net/http package in response")
 		}
