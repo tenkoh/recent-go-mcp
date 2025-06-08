@@ -26,43 +26,24 @@ type MCPServer struct {
 	formatter      domain.ResponseFormatter
 }
 
-// NewMCPServer creates a new MCP server with injected dependencies
-func NewMCPServer(featureService domain.FeatureService, formatter domain.ResponseFormatter) *MCPServer {
-	return &MCPServer{
-		featureService: featureService,
-		formatter:      formatter,
-	}
-}
-
-func main() {
-	// Initialize structured logging
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
-	slog.SetDefault(logger)
-	
-	logger.Info("Initializing recent-go-mcp server",
-		"component", "recent-go-mcp",
-		"version", "1.0.0",
-		"architecture", "clean-architecture-with-DI")
-	
+// NewMCPServer creates a new MCP server with dependencies initialized and tools registered
+func NewMCPServer() (*server.MCPServer, error) {
 	// Initialize dependencies
 	comparator := version.NewSemanticVersionComparator()
-	logger.Debug("Version comparator initialized")
 	
 	repo, err := storage.NewEmbeddedReleaseRepository(releasesFS, comparator)
 	if err != nil {
-		logger.Error("Failed to initialize repository", "error", err)
-		os.Exit(1)
+		return nil, err
 	}
-	logger.Info("Repository initialized successfully")
 	
 	featureService := service.NewFeatureService(repo, comparator)
 	formatter := service.NewResponseFormatter(comparator)
-	logger.Debug("Services initialized", "services", []string{"featureService", "formatter"})
 	
-	mcpServer := NewMCPServer(featureService, formatter)
-	logger.Info("MCP server wrapper created")
+	// Create the wrapper for dependency injection
+	mcpWrapper := &MCPServer{
+		featureService: featureService,
+		formatter:      formatter,
+	}
 	
 	// Create MCP server
 	s := server.NewMCPServer("recent-go-mcp", "1.0.0", 
@@ -78,12 +59,34 @@ func main() {
 			mcp.Description("Optional: filter features for a specific standard library package (e.g., 'net/http', 'context')")))
 
 	// Add tool handler
-	s.AddTool(goUpdatesTool, mcpServer.handleGoUpdates)
-	logger.Info("MCP tools registered", "tool", "go-updates")
+	s.AddTool(goUpdatesTool, mcpWrapper.handleGoUpdates)
+	
+	return s, nil
+}
+
+func main() {
+	// Initialize structured logging
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
+	
+	logger.Info("Initializing recent-go-mcp server",
+		"component", "recent-go-mcp",
+		"version", "1.0.0",
+		"architecture", "clean-architecture-with-DI")
+	
+	// Create MCP server with dependencies and tools
+	mcpServer, err := NewMCPServer()
+	if err != nil {
+		logger.Error("Failed to create MCP server", "error", err)
+		os.Exit(1)
+	}
+	logger.Info("MCP server created with dependencies and tools registered")
 
 	// Start server
 	logger.Info("Starting MCP server")
-	if err := server.ServeStdio(s); err != nil {
+	if err := server.ServeStdio(mcpServer); err != nil {
 		logger.Error("Server failed", "error", err)
 		os.Exit(1)
 	}
