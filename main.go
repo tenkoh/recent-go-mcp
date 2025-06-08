@@ -51,12 +51,12 @@ func NewMCPServer() (*server.MCPServer, error) {
 
 	// Define the go-updates tool
 	goUpdatesTool := mcp.NewTool("go-updates",
-		mcp.WithDescription("Get information about Go language features and best practices available in your project's Go version. Shows all features from the oldest supported version up to your current version, helping LLM coding agents use appropriate Go patterns."),
+		mcp.WithDescription("Get comprehensive information about Go language features and best practices available for your project's Go version. Supports Go 1.13 through 1.24, showing all features from Go 1.13 up to your current version, helping LLM coding agents use appropriate Go patterns and modern standard library functions."),
 		mcp.WithString("version", 
 			mcp.Required(),
-			mcp.Description("Go version your project is currently using (e.g., '1.21', '1.22', '1.23')")),
+			mcp.Description("Go version your project is currently using (supported: '1.13' through '1.24', e.g., '1.21', '1.22', '1.23', '1.24')")),
 		mcp.WithString("package", 
-			mcp.Description("Optional: filter features for a specific standard library package (e.g., 'net/http', 'context')")))
+			mcp.Description("Optional: filter features for a specific standard library package (e.g., 'net/http', 'context', 'slices', 'maps')")))
 
 	// Add tool handler
 	s.AddTool(goUpdatesTool, mcpWrapper.handleGoUpdates)
@@ -74,6 +74,7 @@ func main() {
 	logger.Info("Initializing recent-go-mcp server",
 		"component", "recent-go-mcp",
 		"version", "1.0.0",
+		"supportedGoVersions", "1.13-1.24",
 		"architecture", "clean-architecture-with-DI")
 	
 	// Create MCP server with dependencies and tools
