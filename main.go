@@ -47,7 +47,7 @@ func NewMCPServer() (*server.MCPServer, error) {
 	}
 
 	// Create MCP server
-	s := server.NewMCPServer("recent-go-mcp", "1.0.0",
+	s := server.NewMCPServer("recent-go-mcp", "0.1.0",
 		server.WithToolCapabilities(false))
 
 	// Define the go-updates tool
@@ -74,7 +74,7 @@ func main() {
 
 	logger.Info("Initializing recent-go-mcp server",
 		"component", "recent-go-mcp",
-		"version", "1.0.0",
+		"version", "0.1.0",
 		"supportedGoVersions", "1.13-1.24",
 		"architecture", "clean-architecture-with-DI")
 

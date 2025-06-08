@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an MCP (Model Context Protocol) server that provides Go language updates and best practices to LLM coding agents. The server helps agents avoid using outdated Go patterns and leverage new language features.
 
-**Current Status**: v1.0.0 (release ready)
+**Current Status**: v0.1.0 (release ready)
 **Supported Go Versions**: 1.13 through 1.24 (12 versions)
 **Architecture**: Clean architecture with Go 1.24 best practices
 

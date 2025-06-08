@@ -51,7 +51,7 @@ func TestMCPServer_GoUpdates(t *testing.T) {
 				ProtocolVersion: "2024-11-05",
 				ClientInfo: mcp.Implementation{
 					Name:    "test-client",
-					Version: "1.0.0",
+					Version: "0.1.0",
 				},
 				Capabilities: mcp.ClientCapabilities{},
 			},
