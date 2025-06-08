@@ -2,6 +2,9 @@
 
 An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents. This helps agents avoid using outdated Go patterns and leverage modern language features across 12 Go versions.
 
+**NOTICE**
+This repository is experimental and for personal use. (Of course, anyone can use this repository.) LLM coding agent is fully utilized to write code, test and data about Go's features in each release. Some mistakes would be contained. I hope any issues or PRs to improve this repository.
+
 ## Features
 
 - 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
@@ -104,6 +107,9 @@ The tool returns both human-readable text and structured JSON data:
 - **Runtime Improvements**: Performance optimizations and memory management
 - **Toolchain Enhancements**: Build system, module system, and developer tooling updates
 - **Best Practice Recommendations**: Modern patterns and upgrade guidance
+
+## Contribution
+Contributions are really welcomed. Please make an issue or a pull request casually.
 
 ## Development
 
