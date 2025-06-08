@@ -1,24 +1,42 @@
 # Recent Go MCP Server
 
-An MCP (Model Context Protocol) server that provides Go language updates and best practices to LLM coding agents. This helps agents avoid using outdated Go patterns and leverage the latest language features.
+An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents. This helps agents avoid using outdated Go patterns and leverage modern language features across 12 Go versions.
 
 ## Features
 
-- 🔄 **Version Updates**: Get comprehensive updates from any Go version to the latest
-- 📦 **Package-Specific**: Filter updates for specific standard library packages
-- 🎯 **Context-Aware**: Categorized changes (language, runtime, toolchain, performance)
-- 📚 **Rich Information**: Includes examples, impact assessment, and best practices
-- 🚀 **Single Binary**: All release data embedded for easy deployment
+- 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
+- 📦 **Package-Specific Filtering**: Get updates for specific standard library packages (net/http, slices, maps, log/slog, etc.)
+- 🎯 **Modern Go Patterns**: Highlights Go 1.21+ features like slices, maps, structured logging, and go/version package
+- 📚 **Rich Information**: Includes examples, impact assessment, and upgrade recommendations
+- 🚀 **Single Binary**: All release data embedded using go:embed for easy deployment
+- ⚡ **Go 1.24 Best Practices**: Built with modern error handling, context propagation, and efficient operations
+- 🧪 **Thoroughly Tested**: Comprehensive test suite including real MCP protocol communication
 
-## Installation
+## Integration
 
-```bash
-# Build the binary
-go build -o recent-go-mcp
+### With Claude Desktop
 
-# Or install directly
-go install github.com/tenkoh/recent-go-mcp@latest
+Add to your MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "recent-go-mcp": {
+      "command": "go",
+      "args":[
+        "run",
+        "github.com/tenkoh/recent-go-mcp@latest"
+      ]
+    }
+  }
+}
 ```
+
+You can install the command using `go install`, then register the executable binary's path to MCP configuration.
+
+### With Other MCP Clients
+
+The server uses stdio transport and follows the MCP specification. It can be integrated with any MCP-compatible LLM client.
 
 ## Usage
 
@@ -29,12 +47,12 @@ The server implements the Model Context Protocol and can be used with any MCP-co
 Get information about Go language updates and best practices.
 
 **Parameters:**
-- `version` (required): Go version to check updates from (e.g., "1.21", "1.22", "1.23")
-- `package` (optional): Specific standard library package to filter updates (e.g., "net/http", "context")
+- `version` (required): Go version to check updates from (supported: "1.13" through "1.24")
+- `package` (optional): Specific standard library package to filter updates (e.g., "net/http", "slices", "maps", "log/slog")
 
 ### Examples
 
-#### Get all updates from Go 1.21
+#### Get all updates from Go 1.21 to Go 1.24
 ```json
 {
   "jsonrpc": "2.0",
@@ -49,7 +67,7 @@ Get information about Go language updates and best practices.
 }
 ```
 
-#### Get net/http specific updates from Go 1.22
+#### Get slices package specific updates from Go 1.20
 ```json
 {
   "jsonrpc": "2.0",
@@ -58,8 +76,8 @@ Get information about Go language updates and best practices.
   "params": {
     "name": "go-updates",
     "arguments": {
-      "version": "1.22",
-      "package": "net/http"
+      "version": "1.20",
+      "package": "slices"
     }
   }
 }
@@ -75,54 +93,42 @@ The tool returns both human-readable text and structured JSON data:
 - **Examples**: Code examples showing new usage patterns
 - **Impact Indicators**: Visual icons showing the type of change (🆕 new, ✨ enhancement, ⚡ performance, etc.)
 
-## Integration
-
-### With Claude Desktop
-
-Add to your MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "recent-go-mcp": {
-      "command": "/path/to/recent-go-mcp"
-    }
-  }
-}
-```
-
-### With Other MCP Clients
-
-The server uses stdio transport and follows the MCP specification. It can be integrated with any MCP-compatible LLM client.
 
 ## Data Coverage
 
-Currently includes:
-- Go 1.21 (August 2023)
-- Go 1.22 (February 2024) 
-- Go 1.23 (August 2024)
+**Comprehensive Go Version Support:**
+- Go 1.13 through Go 1.24 (12 versions)
+- Complete coverage from legacy versions to the latest features
 
-The embedded data covers:
-- Language feature additions and changes
-- Standard library package updates
-- Runtime improvements
-- Toolchain enhancements
-- Performance optimizations
-- Best practice recommendations
+**The embedded data covers:**
+- **Language Features**: New syntax, constructs, and language improvements
+- **Standard Library Updates**: Package additions, enhancements, and new APIs
+- **Modern Packages**: slices, maps, log/slog, go/version, and other Go 1.21+ additions
+- **Runtime Improvements**: Performance optimizations and memory management
+- **Toolchain Enhancements**: Build system, module system, and developer tooling updates
+- **Best Practice Recommendations**: Modern patterns and upgrade guidance
 
 ## Development
 
 ```bash
-# Run tests
+# Run all tests (includes MCP protocol tests)
 go test ./...
 
-# Build
+# Run MCP server integration tests specifically
+go test -v -run TestMCPServer
+
+# Build the server
 go build -o recent-go-mcp
 
-# Test manually
+# Test manually with JSON-RPC
 echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | ./recent-go-mcp
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "go-updates", "arguments": {"version": "1.24"}}}' | ./recent-go-mcp
 ```
 
 ## License
 
-[Add your license here]
+MIT
+
+## Author
+
+tenkoh (using Claude Sonnet 4)
