@@ -6,11 +6,8 @@ An MCP (Model Context Protocol) server that provides comprehensive Go language u
 
 - 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
 - 📦 **Package-Specific Filtering**: Get updates for specific standard library packages (net/http, slices, maps, log/slog, etc.)
-- 🎯 **Modern Go Patterns**: Highlights Go 1.21+ features like slices, maps, structured logging, and go/version package
 - 📚 **Rich Information**: Includes examples, impact assessment, and upgrade recommendations
 - 🚀 **Single Binary**: All release data embedded using go:embed for easy deployment
-- ⚡ **Go 1.24 Best Practices**: Built with modern error handling, context propagation, and efficient operations
-- 🧪 **Thoroughly Tested**: Comprehensive test suite including real MCP protocol communication
 
 ## Integration
 
