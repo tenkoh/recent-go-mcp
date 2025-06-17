@@ -5,6 +5,10 @@ An MCP (Model Context Protocol) server that provides comprehensive Go language u
 **NOTICE**
 This repository is experimental and for personal use. (Of course, anyone can use this repository.) LLM coding agent is fully utilized to write code, test and data about Go's features in each release. Some mistakes would be contained. I hope any issues or PRs to improve this repository.
 
+**NOTICE**
+The output of this tool might be oversize with some MCP hosts like Claude Code.
+I will update this tool with pagenation feature soon.
+
 ## Features
 
 - 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
