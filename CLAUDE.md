@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an MCP (Model Context Protocol) server that provides Go language updates and best practices to LLM coding agents. The server helps agents avoid using outdated Go patterns and leverage new language features.
+This is an MCP (Model Context Protocol) server that provides Go language updates and best practices to LLM coding agents in structured Markdown format. The server helps agents avoid using outdated Go patterns and leverage new language features efficiently.
 
-**Current Status**: v0.1.0 (release ready)
+**Current Status**: v0.2.0 (latest release)
 **Supported Go Versions**: 1.13 through 1.24 (12 versions)
 **Architecture**: Clean architecture with Go 1.24 best practices
 
@@ -39,7 +39,7 @@ This project follows clean architecture principles with dependency injection and
 
 ### Core Components
 
-- **main.go**: MCP server implementation with `NewMCPServer()` factory function that handles full initialization
+- **main.go**: MCP server implementation with `NewMCPServer()` factory function and version constant management
 - **internal/domain/**: Domain models, interfaces, and structured error types with proper error wrapping
 - **internal/service/**: Business logic layer with context propagation and modern Go patterns
 - **internal/storage/**: Data access layer using embedded filesystem and modern slice operations
@@ -86,9 +86,10 @@ The server provides a single tool `go-updates` that:
 - **Supports Go 1.13 through 1.24**: Comprehensive version coverage (12 Go versions)
 - **Version Parameter**: Required Go version (e.g., "1.21", "1.22", "1.23", "1.24")
 - **Package Filtering**: Optional package name for focused results (e.g., "net/http", "slices", "maps")
-- **Dual Response Format**: Returns both formatted text and structured JSON
+- **Markdown Response Format**: Returns structured Markdown for optimal LLM consumption
 - **Modern Go Features**: Highlights `slices`, `maps`, `log/slog`, `go/version`, and other Go 1.21+ features
 - **Best Practices**: Includes examples, impact indicators, and upgrade recommendations
+- **Efficient Output**: ~70% size reduction compared to previous dual-format approach
 
 ## Go 1.24 Modernization Features
 

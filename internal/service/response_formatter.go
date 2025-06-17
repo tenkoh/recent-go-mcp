@@ -19,10 +19,10 @@ func NewResponseFormatter(comparator domain.VersionComparator) domain.ResponseFo
 	}
 }
 
-// FormatAsText formats a FeatureResponse as LLM-readable text
+// FormatAsText formats a FeatureResponse as LLM-readable Markdown text
 func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse, version string, packageName string) string {
 	if len(response.Changes) == 0 && len(response.PackageInfo) == 0 {
-		return "No Go features found for your project (Go " + response.ToVersion + ")."
+		return "# No Go Features Found\n\nNo Go features found for your project (Go " + response.ToVersion + ")."
 	}
 
 	// Use strings.Builder for efficient string construction
@@ -30,12 +30,12 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 	builder.Grow(2048) // Pre-allocate reasonable buffer size
 
 	// Write header
-	builder.WriteString("Go Features Available in Your Project (Go ")
+	builder.WriteString("# Go Features Available (Go ")
 	builder.WriteString(response.ToVersion)
 	builder.WriteString(")\n\n")
 
 	// Write summary
-	builder.WriteString("Summary: ")
+	builder.WriteString("## Summary\n")
 	builder.WriteString(response.Summary)
 	builder.WriteString("\n\n")
 
@@ -57,17 +57,17 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 		}
 
 		// Write version header
-		builder.WriteString("Go ")
+		builder.WriteString("## Go ")
 		builder.WriteString(version)
-		builder.WriteString(" Features:\n\n")
+		builder.WriteString(" Features\n\n")
 
 		// Show general changes for this version
 		if len(versionChanges) > 0 {
-			builder.WriteString("Language & Runtime Changes:\n")
+			builder.WriteString("### Language & Runtime Changes\n")
 			for _, change := range versionChanges {
-				builder.WriteString("- ")
+				builder.WriteString("- **")
 				builder.WriteString(change.Category)
-				builder.WriteString(" (")
+				builder.WriteString("** (")
 				builder.WriteString(change.Impact)
 				builder.WriteString("): ")
 				builder.WriteString(change.Description)
@@ -78,7 +78,7 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 
 		// Show package changes for this version
 		if len(versionPackages) > 0 {
-			builder.WriteString("Standard Library Updates:\n")
+			builder.WriteString("### Standard Library Updates\n\n")
 
 			for pkg, changes := range versionPackages {
 				if packageName != "" && pkg != packageName {
@@ -86,30 +86,31 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 				}
 
 				if packageName == "" {
-					builder.WriteString("Package ")
+					builder.WriteString("#### Package `")
 					builder.WriteString(pkg)
-					builder.WriteString(":\n")
+					builder.WriteString("`\n")
 				}
 
 				for _, change := range changes {
 					builder.WriteString("- ")
 					if change.Function != "" {
+						builder.WriteString("**`")
 						builder.WriteString(change.Function)
-						builder.WriteString(" (")
+						builder.WriteString("`** (")
 						builder.WriteString(change.Impact)
 						builder.WriteString("): ")
 					} else {
-						builder.WriteString("(")
+						builder.WriteString("**(")
 						builder.WriteString(change.Impact)
-						builder.WriteString("): ")
+						builder.WriteString(")**: ")
 					}
 					builder.WriteString(change.Description)
 					builder.WriteString("\n")
 
 					if change.Example != "" {
-						builder.WriteString("  Example: ")
+						builder.WriteString("  ```go\n  ")
 						builder.WriteString(change.Example)
-						builder.WriteString("\n")
+						builder.WriteString("\n  ```\n")
 					}
 				}
 				builder.WriteString("\n")
@@ -119,7 +120,8 @@ func (f *DefaultResponseFormatter) FormatAsText(response *domain.FeatureResponse
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString("Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.\n")
+	builder.WriteString("## Note\n")
+	builder.WriteString("These are all the Go features available in your project version. Use them to write modern, efficient Go code.\n")
 
 	return builder.String()
 }

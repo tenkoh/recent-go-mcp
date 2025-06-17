@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"encoding/json"
 	"log/slog"
 	"os"
 	"reflect"
@@ -15,6 +14,9 @@ import (
 	"github.com/tenkoh/recent-go-mcp/internal/storage"
 	"github.com/tenkoh/recent-go-mcp/internal/version"
 )
+
+// Version of the MCP server
+const Version = "0.2.0"
 
 // Embed all Go release data files
 //
@@ -47,12 +49,12 @@ func NewMCPServer() (*server.MCPServer, error) {
 	}
 
 	// Create MCP server
-	s := server.NewMCPServer("recent-go-mcp", "0.1.0",
+	s := server.NewMCPServer("recent-go-mcp", Version,
 		server.WithToolCapabilities(false))
 
 	// Define the go-updates tool
 	goUpdatesTool := mcp.NewTool("go-updates",
-		mcp.WithDescription("Get comprehensive information about Go language features and best practices available for your project's Go version. Supports Go 1.13 through 1.24, showing all features from Go 1.13 up to your current version, helping LLM coding agents use appropriate Go patterns and modern standard library functions."),
+		mcp.WithDescription("Get comprehensive Go language features and best practices for your project version in structured Markdown format. Supports Go 1.13-1.24, displaying all available features chronologically to help LLM coding agents use modern Go patterns and standard library functions efficiently."),
 		mcp.WithString("version",
 			mcp.Required(),
 			mcp.Description("Go version your project is currently using (supported: '1.13' through '1.24', e.g., '1.21', '1.22', '1.23', '1.24')")),
@@ -74,7 +76,7 @@ func main() {
 
 	logger.Info("Initializing recent-go-mcp server",
 		"component", "recent-go-mcp",
-		"version", "0.1.0",
+		"version", Version,
 		"supportedGoVersions", "1.13-1.24",
 		"architecture", "clean-architecture-with-DI")
 
@@ -149,25 +151,17 @@ func (m *MCPServer) handleGoUpdates(ctx context.Context, request mcp.CallToolReq
 		"changesCount", len(response.Changes),
 		"packagesCount", len(response.PackageInfo))
 
-	// Format response as JSON
-	responseJSON, err := json.MarshalIndent(response, "", "  ")
-	if err != nil {
-		logger.Error("Failed to marshal JSON response", "error", err)
-		return mcp.NewToolResultError("Error formatting response: " + err.Error()), nil
-	}
-
-	// Create detailed text response using formatter
-	textResponse := m.formatter.FormatAsText(response, version, packageName)
+	// Create detailed markdown response using formatter
+	markdownResponse := m.formatter.FormatAsText(response, version, packageName)
 
 	logger.Info("Request processed successfully",
 		"version", version,
 		"package", packageName,
-		"responseLength", len(textResponse))
+		"responseLength", len(markdownResponse))
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			mcp.NewTextContent(textResponse),
-			mcp.NewTextContent("\n\n--- JSON Response ---\n" + string(responseJSON)),
+			mcp.NewTextContent(markdownResponse),
 		},
 	}, nil
 }

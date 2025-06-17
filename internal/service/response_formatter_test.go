@@ -21,7 +21,7 @@ func TestResponseFormatter_FullStringComparison(t *testing.T) {
 		}
 
 		result := formatter.FormatAsText(response, "1.21", "")
-		expected := "No Go features found for your project (Go 1.21)."
+		expected := "# No Go Features Found\n\nNo Go features found for your project (Go 1.21)."
 
 		if result != expected {
 			t.Errorf("Expected:\n%q\n\nGot:\n%q", expected, result)
@@ -48,17 +48,19 @@ func TestResponseFormatter_FullStringComparison(t *testing.T) {
 
 		result := formatter.FormatAsText(response, "1.22", "")
 
-		expected := `Go Features Available in Your Project (Go 1.22)
+		expected := `# Go Features Available (Go 1.22)
 
-Summary: Go 1.22 introduces new language features
+## Summary
+Go 1.22 introduces new language features
 
-Go 1.22 Features:
+## Go 1.22 Features
 
-Language & Runtime Changes:
-- language (new): for-range over integers
+### Language & Runtime Changes
+- **language** (new): for-range over integers
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {
@@ -90,18 +92,21 @@ Note: These are all the Go features available in your project version. Use them 
 
 		result := formatter.FormatAsText(response, "1.21", "")
 
-		expected := `Go Features Available in Your Project (Go 1.21)
+		expected := `# Go Features Available (Go 1.21)
 
-Summary: Go 1.21 adds new standard library packages
+## Summary
+Go 1.21 adds new standard library packages
 
-Go 1.21 Features:
+## Go 1.21 Features
 
-Standard Library Updates:
-Package slices:
-- Sort (new): sorts a slice
+### Standard Library Updates
+
+#### Package ` + "`slices`" + `
+- **` + "`Sort`" + `** (new): sorts a slice
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {
@@ -137,21 +142,24 @@ Note: These are all the Go features available in your project version. Use them 
 
 		result := formatter.FormatAsText(response, "1.22", "")
 
-		expected := `Go Features Available in Your Project (Go 1.22)
+		expected := `# Go Features Available (Go 1.22)
 
-Summary: Language and library improvements
+## Summary
+Language and library improvements
 
-Go 1.22 Features:
+## Go 1.22 Features
 
-Language & Runtime Changes:
-- language (new): for-range over integers
+### Language & Runtime Changes
+- **language** (new): for-range over integers
 
-Standard Library Updates:
-Package net/http:
-- ServeMux (enhancement): enhanced routing
+### Standard Library Updates
+
+#### Package ` + "`net/http`" + `
+- **` + "`ServeMux`" + `** (enhancement): enhanced routing
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {
@@ -189,17 +197,20 @@ Note: These are all the Go features available in your project version. Use them 
 
 		result := formatter.FormatAsText(response, "1.22", "net/http")
 
-		expected := `Go Features Available in Your Project (Go 1.22)
+		expected := `# Go Features Available (Go 1.22)
 
-Summary: Multiple packages available
+## Summary
+Multiple packages available
 
-Go 1.22 Features:
+## Go 1.22 Features
 
-Standard Library Updates:
-- ServeMux (enhancement): enhanced routing
+### Standard Library Updates
+
+- **` + "`ServeMux`" + `** (enhancement): enhanced routing
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {
@@ -231,19 +242,24 @@ Note: These are all the Go features available in your project version. Use them 
 
 		result := formatter.FormatAsText(response, "1.21", "")
 
-		expected := `Go Features Available in Your Project (Go 1.21)
+		expected := `# Go Features Available (Go 1.21)
 
-Summary: Package with code examples
+## Summary
+Package with code examples
 
-Go 1.21 Features:
+## Go 1.21 Features
 
-Standard Library Updates:
-Package slices:
-- Sort (new): sorts a slice
-  Example: slices.Sort([]int{3,1,2})
+### Standard Library Updates
+
+#### Package ` + "`slices`" + `
+- **` + "`Sort`" + `** (new): sorts a slice
+  ` + "```go" + `
+  slices.Sort([]int{3,1,2})
+  ` + "```" + `
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {
@@ -275,29 +291,31 @@ Note: These are all the Go features available in your project version. Use them 
 
 		result := formatter.FormatAsText(response, "1.23", "")
 
-		expected := `Go Features Available in Your Project (Go 1.23)
+		expected := `# Go Features Available (Go 1.23)
 
-Summary: Features from Go 1.21 to 1.23
+## Summary
+Features from Go 1.21 to 1.23
 
-Go 1.21 Features:
+## Go 1.21 Features
 
-Language & Runtime Changes:
-- language (new): 1.21 feature
-
-
-Go 1.22 Features:
-
-Language & Runtime Changes:
-- language (new): 1.22 feature
+### Language & Runtime Changes
+- **language** (new): 1.21 feature
 
 
-Go 1.23 Features:
+## Go 1.22 Features
 
-Language & Runtime Changes:
-- language (new): 1.23 feature
+### Language & Runtime Changes
+- **language** (new): 1.22 feature
 
 
-Note: These are all the Go features available in your project version. Use them to write modern, efficient Go code.
+## Go 1.23 Features
+
+### Language & Runtime Changes
+- **language** (new): 1.23 feature
+
+
+## Note
+These are all the Go features available in your project version. Use them to write modern, efficient Go code.
 `
 
 		if result != expected {

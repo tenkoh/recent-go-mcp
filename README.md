@@ -1,6 +1,6 @@
 # Recent Go MCP Server
 
-An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents. This helps agents avoid using outdated Go patterns and leverage modern language features across 12 Go versions.
+An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents in structured Markdown format. This helps agents avoid using outdated Go patterns and leverage modern language features efficiently across 12 Go versions.
 
 **NOTICE**
 This repository is experimental and for personal use. (Of course, anyone can use this repository.) LLM coding agent is fully utilized to write code, test and data about Go's features in each release. Some mistakes would be contained. I hope any issues or PRs to improve this repository.
@@ -14,6 +14,7 @@ I will update this tool with pagenation feature soon.
 - 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
 - 📦 **Package-Specific Filtering**: Get updates for specific standard library packages (net/http, slices, maps, log/slog, etc.)
 - 📚 **Rich Information**: Includes examples, impact assessment, and upgrade recommendations
+- 📝 **Markdown Format**: Structured output optimized for LLM consumption with ~70% size reduction
 - 🚀 **Single Binary**: All release data embedded using go:embed for easy deployment
 
 ## Integration
@@ -89,13 +90,13 @@ Get information about Go language updates and best practices.
 
 ### Response Format
 
-The tool returns both human-readable text and structured JSON data:
+The tool returns structured Markdown output optimized for LLM consumption:
 
-- **Summary**: Overview of changes and their impact
-- **General Changes**: Language, runtime, and toolchain improvements
-- **Package Updates**: Specific updates per standard library package
-- **Examples**: Code examples showing new usage patterns
-- **Impact Indicators**: Visual icons showing the type of change (🆕 new, ✨ enhancement, ⚡ performance, etc.)
+- **Hierarchical Structure**: Clear headings (`#`, `##`, `###`) for easy navigation
+- **Summary Section**: Overview of changes and their impact
+- **Version-Specific Sections**: Chronologically organized language and library changes
+- **Code Highlighting**: Function names in `` `backticks` `` and examples in ```go code blocks```
+- **Enhanced Readability**: **Bold** emphasis for important items and proper Markdown formatting
 
 
 ## Data Coverage
