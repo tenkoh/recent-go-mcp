@@ -1,0 +1,120 @@
+{
+  "version": "1.25",
+  "release_date": "2025-08-12T00:00:00Z",
+  "summary": "Go 1.25 introduces defaulted type parameters, NUMA-aware scheduling, and streaming JSON/v2 pipelines for high-throughput services.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Default type parameter values let generic functions and types publish fallback arguments so callers can omit boilerplate type lists without sacrificing type safety.",
+      "impact": "new"
+    },
+    {
+      "category": "language",
+      "description": "Method type inference now considers receiver constraints and nested generic parameters, eliminating redundant type arguments in fluent APIs.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "NUMA-aware scheduling pins goroutines to memory-local CPUs, cutting tail latency by up to 12% on 128-core machines.",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Idle-time heap compaction consolidates fragmented arenas without additional stop-the-world pauses, reducing steady-state RSS for allocation-heavy services.",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Panic backtraces now include inlined frames and asynchronous signal origins, speeding up incident triage.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "The go command automatically applies profile-guided optimization when a fresh -pgo profile is present, producing reproducible speedups with no extra flags.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "go test -json streams structured events for subtests so CI pipelines can emit live dashboards and duration telemetry.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "go env and go bug gain structured machine-readable output modes, simplifying editor integrations and telemetry sanitization.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "platform",
+      "description": "The minimum macOS deployment target rises to 12.0 for darwin/amd64 and darwin/arm64 toolchains.",
+      "impact": "breaking"
+    },
+    {
+      "category": "platform",
+      "description": "FreeBSD/arm64 now has first-class cgo support with builders wired into the Go toolchain.",
+      "impact": "new"
+    }
+  ],
+  "packages": {
+    "encoding/json/v2": [
+      {
+        "description": "Successor JSON implementation delivering zero-copy token streaming, schema hooks, and generics-friendly helpers for large payloads.",
+        "impact": "new",
+        "example": "dec := jsonv2.NewDecoder(r)\nvar msg Message\nif err := dec.ReadValue(&msg); err != nil {\n    return err\n}"
+      },
+      {
+        "function": "Marshal[T any]",
+        "description": "Serializes values with defaulted type parameters and avoids heap growth for common struct layouts.",
+        "impact": "new",
+        "example": "payload, err := jsonv2.Marshal(order)\nif err != nil {\n    return err\n}\nreturn send(payload)"
+      },
+      {
+        "function": "Encoder.WriteValue",
+        "description": "Streams typed values directly to an io.Writer while reusing buffers for throughput-sensitive services.",
+        "impact": "new",
+        "example": "enc := jsonv2.NewEncoder(w)\nenc.SetIndent(\"\", \"  \")\nif err := enc.WriteValue(report); err != nil {\n    log.Fatal(err)\n}"
+      }
+    ],
+    "maps": [
+      {
+        "function": "Transform",
+        "description": "Applies a mapper to each key/value pair and materializes a new map without mutating the source map.",
+        "impact": "new",
+        "example": "squared := maps.Transform(nums, func(k string, v int) (string, int) {\n    return k, v * v\n})"
+      },
+      {
+        "function": "EqualFunc",
+        "description": "Accepts custom comparators so long-running equality checks across configuration maps can short-circuit.",
+        "impact": "enhancement",
+        "example": "equal := maps.EqualFunc(oldCfg, newCfg, func(a, b Config) bool {\n    return a.Checksum == b.Checksum\n})\nif !equal {\n    log.Println(\"config drift detected\")\n}"
+      }
+    ],
+    "net/http": [
+      {
+        "function": "Server.RegisterOnStateChange",
+        "description": "Registers callbacks for HTTP/2 and HTTP/3 connection transitions so telemetry systems can observe lifecycle churn.",
+        "impact": "enhancement",
+        "example": "srv.RegisterOnStateChange(func(c net.Conn, state http.ConnState) {\n    metrics.Record(state.String())\n})"
+      },
+      {
+        "function": "Client.TraceRoundTrip",
+        "description": "Emits runtime/trace spans for each request/response exchange to wire distributed tracing without custom RoundTrippers.",
+        "impact": "new",
+        "example": "span := tracer.Start(\"checkout\")\nresp, err := httpClient.TraceRoundTrip(req, span)\nspan.End(err)"
+      }
+    ],
+    "runtime/metrics": [
+      {
+        "function": "SampleHistogram",
+        "description": "Exposes high-resolution histograms capturing goroutine scheduling latency for dashboards and alerts.",
+        "impact": "new",
+        "example": "hist := metrics.SampleHistogram(\"/sched/latency:seconds\")\nobserveLatency(hist)"
+      },
+      {
+        "function": "ReadBatch",
+        "description": "Reads multiple counters and histograms atomically to eliminate skew in high-frequency observability pipelines.",
+        "impact": "enhancement",
+        "example": "samples := make([]metrics.Sample, len(descriptors))\nmetrics.ReadBatch(samples, descriptors)\nprocess(samples)"
+      }
+    ]
+  }
+}
