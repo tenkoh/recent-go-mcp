@@ -1,6 +1,6 @@
 # Recent Go MCP Server
 
-An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents in structured Markdown format. This helps agents avoid using outdated Go patterns and leverage modern language features efficiently across 12 Go versions.
+An MCP (Model Context Protocol) server that provides comprehensive Go language updates and best practices to LLM coding agents in structured Markdown format. This helps agents avoid using outdated Go patterns and leverage modern language features efficiently across 13 Go versions.
 
 **NOTICE**
 This repository is experimental and for personal use. (Of course, anyone can use this repository.) LLM coding agent is fully utilized to write code, test and data about Go's features in each release. Some mistakes would be contained. I hope any issues or PRs to improve this repository.
@@ -11,7 +11,7 @@ I will update this tool with pagenation feature soon.
 
 ## Features
 
-- 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.24 (12 versions)
+- 🔄 **Comprehensive Version Coverage**: Supports Go 1.13 through 1.25 (13 versions)
 - 📦 **Package-Specific Filtering**: Get updates for specific standard library packages (net/http, slices, maps, log/slog, etc.)
 - 📚 **Rich Information**: Includes examples, impact assessment, and upgrade recommendations
 - 📝 **Markdown Format**: Structured output optimized for LLM consumption with ~70% size reduction
@@ -52,12 +52,12 @@ The server implements the Model Context Protocol and can be used with any MCP-co
 Get information about Go language updates and best practices.
 
 **Parameters:**
-- `version` (required): Go version to check updates from (supported: "1.13" through "1.24")
+- `version` (required): Go version to check updates from (supported: "1.13" through "1.25")
 - `package` (optional): Specific standard library package to filter updates (e.g., "net/http", "slices", "maps", "log/slog")
 
 ### Examples
 
-#### Get all updates from Go 1.21 to Go 1.24
+#### Get all updates from Go 1.21 to Go 1.25
 ```json
 {
   "jsonrpc": "2.0",
@@ -102,7 +102,7 @@ The tool returns structured Markdown output optimized for LLM consumption:
 ## Data Coverage
 
 **Comprehensive Go Version Support:**
-- Go 1.13 through Go 1.24 (12 versions)
+- Go 1.13 through Go 1.25 (13 versions)
 - Complete coverage from legacy versions to the latest features
 
 **The embedded data covers:**
@@ -130,7 +130,7 @@ go build -o recent-go-mcp
 
 # Test manually with JSON-RPC
 echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | ./recent-go-mcp
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "go-updates", "arguments": {"version": "1.24"}}}' | ./recent-go-mcp
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "go-updates", "arguments": {"version": "1.25"}}}' | ./recent-go-mcp
 ```
 
 ## License
