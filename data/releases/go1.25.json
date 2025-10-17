@@ -134,386 +134,454 @@
       {
         "function": "Wait",
         "description": "Blocks until all goroutines in the bubble are waiting, ensuring the test reaches quiescence before assertions.",
-        "impact": "new"
+        "impact": "new",
+        "example": "synctest.Test(func(t *synctest.T) {\n    go doWork(t.Context())\n    synctest.Wait(t)\n})"
       }
     ],
     "encoding/json/v2": [
       {
         "description": "Experimental JSON implementation activated with GOEXPERIMENT=jsonv2, delivering faster decoding and new configuration options.",
-        "impact": "new"
+        "impact": "new",
+        "example": "GOEXPERIMENT=jsonv2 go test ./..."
       },
       {
         "package": "encoding/json/jsontext",
         "description": "Companion low-level package exposes JSON tokenization APIs when the experiment is enabled.",
-        "impact": "new"
+        "impact": "new",
+        "example": "decoder := jsontext.NewDecoder(strings.NewReader(data))"
       }
     ],
     "encoding/json": [
       {
         "description": "Uses the v2 implementation when GOEXPERIMENT=jsonv2 is set, maintaining marshal semantics but changing error text and adding new options.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "enc := json.NewEncoder(w)\nenc.SetOptions(json.UnknownFields(true))"
       }
     ],
     "archive/tar": [
       {
         "function": "Writer.AddFS",
         "description": "Now preserves symbolic links for filesystems implementing io/fs.ReadLinkFS.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "_ = tw.AddFS(os.DirFS(\"assets\"))"
       }
     ],
     "encoding/asn1": [
       {
         "function": "Unmarshal",
         "description": "Parses T61String and BMPString encodings consistently, rejecting malformed inputs previously accepted.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "_, err := asn1.Unmarshal(data, &dst) // malformed T61String now errors"
       }
     ],
     "crypto": [
       {
         "type": "MessageSigner",
         "description": "New interface for signers that hash messages internally, alongside helper `SignMessage` to prefer it when available.",
-        "impact": "new"
+        "impact": "new",
+        "example": "sig, err := crypto.SignMessage(signer, message, rand.Reader)"
       },
       {
         "description": "Changing the `fips140` GODEBUG flag after startup is now ignored instead of panicking, as documented.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "os.Setenv(\"GODEBUG\", \"fips140=on\") // toggling later has no effect"
       },
       {
         "description": "SHA-1, SHA-256, and SHA-512 slow down on amd64 systems lacking AVX2 instructions.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "// Benchmark hashing on pre-AVX2 amd64 hardware to gauge slowdown"
       }
     ],
     "crypto/ecdsa": [
       {
         "function": "ParseRawPrivateKey",
         "description": "Parses raw ECDSA private key bytes without relying on crypto/elliptic helpers.",
-        "impact": "new"
+        "impact": "new",
+        "example": "key, err := ecdsa.ParseRawPrivateKey(rawKey)"
       },
       {
         "function": "ParseUncompressedPublicKey",
         "description": "Decodes uncompressed ECDSA public keys into usable structures.",
-        "impact": "new"
+        "impact": "new",
+        "example": "pub, err := ecdsa.ParseUncompressedPublicKey(rawPub)"
       },
       {
         "method": "(*PrivateKey).Bytes",
         "description": "Serializes private keys using low-level encodings.",
-        "impact": "new"
+        "impact": "new",
+        "example": "data := priv.Bytes()"
       },
       {
         "method": "(*PublicKey).Bytes",
         "description": "Serializes public keys without extra elliptic or big.Int helpers.",
-        "impact": "new"
+        "impact": "new",
+        "example": "data := pub.Bytes()"
       },
       {
         "description": "FIPS 140-3 mode signing throughput is now on par with non-FIPS operation (4× faster).",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "// Expect faster ECDSA signing in FIPS 140-3 mode"
       }
     ],
     "crypto/ed25519": [
       {
         "description": "FIPS 140-3 signing achieves the same performance as standard mode, yielding roughly 4× speedups.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "// Ed25519 FIPS mode now matches non-FIPS throughput"
       }
     ],
     "crypto/elliptic": [
       {
         "description": "Undocumented `Inverse` and `CombinedMult` methods have been removed from curve implementations.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "// Replace curve.Inverse usage with math/big or modular inverse helpers"
       }
     ],
     "crypto/rsa": [
       {
         "description": "Documentation clarifies that RSA public modulus values are public, matching existing Verify warnings.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "fmt.Println(cert.PublicKey.(*rsa.PublicKey).N) // explicitly public"
       },
       {
         "description": "RSA key generation completes roughly three times faster.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "priv, _ := rsa.GenerateKey(rand.Reader, 3072) // noticeably faster"
       }
     ],
     "crypto/sha1": [
       {
         "description": "SHA-1 hashing doubles in speed on amd64 when SHA-NI instructions are present.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "h := sha1.New(); h.Write(data) // faster on SHA-NI systems"
       }
     ],
     "crypto/sha3": [
       {
         "method": "(*SHA3).Clone",
         "description": "Implements hash.Cloner for duplicating hashing state.",
-        "impact": "new"
+        "impact": "new",
+        "example": "clone := h.Clone().(hash.Hash)"
       },
       {
         "description": "Hashing throughput doubles on Apple M-series processors.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "// Measure SHA3 performance improvements on Apple Silicon"
       }
     ],
     "crypto/tls": [
       {
         "field": "ConnectionState.CurveID",
         "description": "Exposes the key exchange group negotiated for the connection.",
-        "impact": "new"
+        "impact": "new",
+        "example": "state := conn.ConnectionState()\nfmt.Println(state.CurveID)"
       },
       {
         "function": "Config.GetEncryptedClientHelloKeys",
         "description": "Allows servers to supply Encrypted Client Hello keys dynamically.",
-        "impact": "new"
+        "impact": "new",
+        "example": "tlsConfig.GetEncryptedClientHelloKeys = func(info *tls.ClientHelloInfo) ([]tls.EncryptedClientHelloKey, error) { ... }"
       },
       {
         "description": "SHA-1 signatures are rejected during TLS 1.2 handshakes unless `GODEBUG=tlssha1=1` re-enables them.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "os.Setenv(\"GODEBUG\", \"tlssha1=1\") // legacy interop opt-in"
       },
       {
         "description": "In FIPS 140-3 mode, Extended Master Secret becomes mandatory and Ed25519/X25519MLKEM768 are now permitted.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "cfg := &tls.Config{MinVersion: tls.VersionTLS12, InsecureSkipVerify: true} // EMS enforced in FIPS"
       },
       {
         "description": "Servers now prefer the highest mutually supported protocol version and both endpoints enforce stricter spec compliance.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "// Expect TLS servers to negotiate TLS 1.3 even if client lists TLS 1.2 first"
       }
     ],
     "crypto/x509": [
       {
         "function": "CreateCertificate",
         "description": "Certificate creation functions accept crypto.MessageSigner implementations for one-shot signing.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "_, err := x509.CreateCertificate(rand.Reader, tmpl, parent, pub, messageSigner)"
       },
       {
         "description": "SubjectKeyId defaults to truncated SHA-256 when missing, overridable via GODEBUG `x509sha256skid=0`.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "os.Setenv(\"GODEBUG\", \"x509sha256skid=0\") // revert to SHA-1"
       },
       {
         "description": "ParseCertificate rejects BasicConstraints with negative pathLenConstraint values.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "_, err := x509.ParseCertificate(badDER) // negative pathLen now errors"
       },
       {
         "description": "ParseCertificate handles T61String and BMPString encodings consistently, potentially rejecting malformed data.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "_, err := x509.ParseCertificate(certDER) // malformed strings rejected"
       }
     ],
     "debug/elf": [
       {
         "description": "Adds PT_RISCV_ATTRIBUTES and SHT_RISCV_ATTRIBUTES constants for RISC-V binaries.",
-        "impact": "new"
+        "impact": "new",
+        "example": "fmt.Println(elf.PT_RISCV_ATTRIBUTES)"
       }
     ],
     "go/ast": [
       {
         "description": "FilterPackage, PackageExports, MergePackageFiles, MergeMode, and related constants are deprecated alongside legacy Object/Package usage.",
-        "impact": "deprecation"
+        "impact": "deprecation",
+        "example": "// Replace go/ast.FilterPackage usage with go/packages"
       },
       {
         "function": "PreorderStack",
         "description": "Traverses syntax trees like Inspect while providing the stack of enclosing nodes for convenience.",
-        "impact": "new"
+        "impact": "new",
+        "example": "ast.PreorderStack(file, func(n ast.Node, stack []ast.Node) bool { return true })"
       }
     ],
     "go/parser": [
       {
         "function": "ParseDir",
         "description": "Deprecated in Go 1.25, reflecting the move away from legacy package inspection APIs.",
-        "impact": "deprecation"
+        "impact": "deprecation",
+        "example": "// Prefer packages.Load instead of go/parser.ParseDir"
       }
     ],
     "go/token": [
       {
         "method": "FileSet.AddExistingFiles",
         "description": "Allows construction of FileSets from pre-existing Files, easing long-lived tooling scenarios.",
-        "impact": "new"
+        "impact": "new",
+        "example": "fset.AddExistingFiles(existingFiles...)"
       }
     ],
     "go/types": [
       {
         "method": "(*Var).Kind",
         "description": "Classifies variables as package-level, receiver, parameter, result, local, or struct field.",
-        "impact": "new"
+        "impact": "new",
+        "example": "kind := v.Kind() // e.g., types.VarParam"
       },
       {
         "function": "LookupSelection",
         "description": "Looks up a field or method and returns it as a Selection, complementing LookupFieldOrMethod.",
-        "impact": "new"
+        "impact": "new",
+        "example": "sel, _ := types.LookupSelection(pkg, recv, true, \"Method\")"
       }
     ],
     "hash": [
       {
         "interface": "XOF",
         "description": "Defines extendable-output hash functionality for algorithms such as SHAKE.",
-        "impact": "new"
+        "impact": "new",
+        "example": "var x hash.XOF = sha3.NewShake256()"
       },
       {
         "description": "All standard Hash implementations now satisfy hash.Cloner to duplicate state.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "clone := h.(hash.Cloner).Clone()"
       }
     ],
     "hash/maphash": [
       {
         "method": "(*Hash).Clone",
         "description": "Implements hash.Cloner for copying random state.",
-        "impact": "new"
+        "impact": "new",
+        "example": "h2 := h.Clone().(*maphash.Hash)"
       }
     ],
     "io/fs": [
       {
         "interface": "ReadLinkFS",
         "description": "Adds opt-in symlink reading support for virtual filesystems.",
-        "impact": "new"
+        "impact": "new",
+        "example": "target, err := fs.Readlink(name)"
       }
     ],
     "log/slog": [
       {
         "function": "GroupAttrs",
         "description": "Convenience helper to build a group Attr from a slice of Attrs.",
-        "impact": "new"
+        "impact": "new",
+        "example": "logger.Info(\"req\", slog.GroupAttrs(\"headers\", attrs...))"
       },
       {
         "method": "Record.Source",
         "description": "Returns the source location associated with a log record when available.",
-        "impact": "new"
+        "impact": "new",
+        "example": "rec := slog.NewRecord(time.Now(), slog.LevelInfo, \"msg\", 0)\nrec.Source()"
       }
     ],
     "mime/multipart": [
       {
         "function": "FileContentDisposition",
         "description": "Constructs Content-Disposition headers for multipart file parts.",
-        "impact": "new"
+        "impact": "new",
+        "example": "header := multipart.FileContentDisposition(\"upload\", filename)"
       }
     ],
     "net": [
       {
         "function": "LookupMX",
         "description": "Returns MX answers that resemble IP addresses instead of discarding them, matching real-world resolver behavior.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "mx, _ := net.LookupMX(\"example.com\") // IP-like names preserved"
       },
       {
         "function": "ListenMulticastUDP",
         "description": "Supports IPv6 multicast addresses on Windows.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "conn, _ := net.ListenMulticastUDP(\"udp6\", nil, group)"
       },
       {
         "description": "Windows now supports converting between os.File and network connections using FileConn/FilePacketConn/FileListener and related methods.",
-        "impact": "new"
+        "impact": "new",
+        "example": "f := conn.File(); dup, _ := net.FileConn(f)"
       }
     ],
     "net/http": [
       {
         "type": "CrossOriginProtection",
         "description": "Implements Fetch-metadata-based CSRF mitigation that rejects unsafe cross-origin browser requests with optional bypass rules.",
-        "impact": "new"
+        "impact": "new",
+        "example": "handler := http.CrossOriginProtection(http.HandlerFunc(fn))"
       }
     ],
     "os": [
       {
         "function": "NewFile",
         "description": "On Windows, accepts handles opened for asynchronous I/O and associates them with the runtime IOCP so deadlines and nonblocking semantics work.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "f := os.NewFile(handle, \"pipe\")\nf.SetDeadline(time.Now().Add(time.Second))"
       },
       {
         "description": "DirFS and Root.FS now satisfy io/fs.ReadLinkFS, and CopyFS preserves symlinks when the source implements it.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "_ = os.CopyFS(dst, os.DirFS(\"src\")) // symlinks retained"
       },
       {
         "type": "Root",
         "description": "Gains filesystem management helpers including Chmod, Chown, Chtimes, Lchown, Link, MkdirAll, ReadFile, Readlink, RemoveAll, Rename, Symlink, and WriteFile.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "_ = root.MkdirAll(\"tmp/data\", 0o755)"
       }
     ],
     "reflect": [
       {
         "function": "TypeAssert",
         "description": "Converts a reflect.Value directly to a typed Go value without intermediate interface allocations.",
-        "impact": "new"
+        "impact": "new",
+        "example": "value := reflect.TypeAssert[int](rv)"
       }
     ],
     "regexp/syntax": [
       {
         "description": "Unicode class escapes now recognize Any, ASCII, Assigned, Cn, LC, and category aliases with case-insensitive, punctuation-agnostic matching per TR18.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "re := regexp.MustCompile(`\\p{Letter}`) // alias lookup works"
       }
     ],
     "runtime": [
       {
         "function": "AddCleanup",
         "description": "Cleanup callbacks execute concurrently and in parallel, improving throughput for heavy cleanup workloads.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "runtime.AddCleanup(obj, func() { go slowCleanup() })"
       },
       {
         "description": "With `GODEBUG=checkfinalizers=1`, the runtime inspects finalizer/cleanup usage each GC and reports queue lengths.",
-        "impact": "new"
+        "impact": "new",
+        "example": "os.Setenv(\"GODEBUG\", \"checkfinalizers=1\")"
       },
       {
         "function": "SetDefaultGOMAXPROCS",
         "description": "Resets GOMAXPROCS to the runtime default, re-enabling container-aware behavior after manual overrides.",
-        "impact": "new"
+        "impact": "new",
+        "example": "runtime.SetDefaultGOMAXPROCS()"
       }
     ],
     "runtime/pprof": [
       {
         "description": "Mutex profiles now attribute contention on runtime locks to the end of the blocking critical section; the runtimecontentionstacks GODEBUG toggle is removed.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "pprof.Lookup(\"mutex\").WriteTo(w, 0) // clearer runtime lock attribution"
       }
     ],
     "runtime/trace": [
       {
         "type": "FlightRecorder",
         "description": "Captures rolling execution traces that can be snapshotted on demand using configurable retention windows.",
-        "impact": "new"
+        "impact": "new",
+        "example": "rec := trace.NewFlightRecorder(cfg)\nrec.WriteTo(w)"
       }
     ],
     "sync": [
       {
         "method": "(*WaitGroup).Go",
         "description": "Launches a goroutine and increments the WaitGroup counter in one step for common patterns.",
-        "impact": "new"
+        "impact": "new",
+        "example": "wg.Go(func() error { defer cleanup(); return nil })"
       }
     ],
     "testing": [
       {
         "method": "(T|B|F).Attr",
         "description": "Emits structured key/value attributes into test output.",
-        "impact": "new"
+        "impact": "new",
+        "example": "t.Attr(\"component\", \"worker\")"
       },
       {
         "method": "(T|B|F).Output",
         "description": "Provides an io.Writer backed by the test log without file and line prefixes.",
-        "impact": "new"
+        "impact": "new",
+        "example": "fmt.Fprintln(t.Output(), \"streamed log line\")"
       },
       {
         "function": "AllocsPerRun",
         "description": "Now panics if invoked while tests run in parallel, preventing flaky measurements.",
-        "impact": "breaking"
+        "impact": "breaking",
+        "example": "testing.AllocsPerRun(1, func() { /* ensure no parallel tests */ })"
       }
     ],
     "testing/fstest": [
       {
         "type": "MapFS",
         "description": "Implements io/fs.ReadLinkFS for symlink-aware filesystem tests.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "target, _ := fstest.MapFS{\"link\": {Mode: fs.ModeSymlink, Target: \"dst\"}}.Readlink(\"link\")"
       },
       {
         "function": "TestFS",
         "description": "Validates ReadLinkFS behavior and avoids following symlinks to prevent unbounded recursion.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "fstest.TestFS(fs, \"dir\", \"dir/file\")"
       }
     ],
     "unicode": [
       {
         "var": "CategoryAliases",
         "description": "Exposes Unicode category alias names such as Letter for L.",
-        "impact": "new"
+        "impact": "new",
+        "example": "fmt.Println(unicode.CategoryAliases[\"Letter\"])"
       },
       {
         "description": "Adds Cn and LC category tables and folds C to include Cn, covering unassigned code points.",
-        "impact": "enhancement"
+        "impact": "enhancement",
+        "example": "_, ok := unicode.Cn[r] // detect unassigned code points"
       }
     ],
     "unique": [
       {
         "description": "Interned values are reclaimed sooner, more efficiently, and in parallel, avoiding memory blow-ups for highly unique data sets.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "u := unique.Make[string]()\n_ = u.Intern(\"value\")"
       },
       {
         "description": "Values containing Handle chains are collected in a single GC cycle once unused instead of requiring multiple collections.",
-        "impact": "performance"
+        "impact": "performance",
+        "example": "// Handle chains release promptly after Go 1.25"
       }
     ]
   }
