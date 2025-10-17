@@ -5,8 +5,8 @@ Create a comprehensive JSON changelog file for Go version releases that matches 
 
 ## Input Requirements
 You will be provided with:
-1. **Go version number** (e.g., "1.24")
-2. **Official Go release notes URL** (e.g., https://go.dev/doc/go1.24)
+1. **Go version number** (e.g., "1.25")
+2. **Official Go release notes URL** (e.g., https://go.dev/doc/go1.25)
 3. **Go language specification changes** (if applicable)
 4. **Standard library documentation** for new/changed packages
 
