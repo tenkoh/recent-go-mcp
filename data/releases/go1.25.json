@@ -1,0 +1,520 @@
+{
+  "version": "1.25",
+  "release_date": "2025-08-01T00:00:00Z",
+  "summary": "Go 1.25 refines the toolchain with new go command options, adds container-aware runtime defaults and experimental GC and JSON stacks, and delivers broad standard library and platform improvements.",
+  "changes": [
+    {
+      "category": "language",
+      "description": "Language specification removes the notion of core types in favor of dedicated prose without changing program semantics.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "`go build -asan` now enables C leak detection at program exit by default, reporting errors for unreleased C allocations unless disabled via ASAN_OPTIONS.",
+      "impact": "breaking"
+    },
+    {
+      "category": "toolchain",
+      "description": "Go distributions ship fewer prebuilt tool binaries, building rarely used tools on demand via `go tool`.",
+      "impact": "breaking"
+    },
+    {
+      "category": "toolchain",
+      "description": "New `go.mod` `ignore` directive lets module authors exclude directories from pattern matching while keeping them in module zip files.",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "`go doc -http` starts a local documentation server and opens the requested documentation in a browser.",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "`go version -m -json` emits the JSON encoding of embedded `runtime/debug.BuildInfo` data for binaries.",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "Module path resolution now understands repository subdirectories via extended go-import meta tags with explicit subdir paths.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "The new `work` package pattern matches every package in the active work module or workspace modules.",
+      "impact": "new"
+    },
+    {
+      "category": "toolchain",
+      "description": "When updating the `go` directive, the go command no longer injects a toolchain line reflecting its own version.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "toolchain",
+      "description": "`go vet` gains `waitgroup` and `hostport` analyzers to flag misplaced WaitGroup.Add calls and unsafe fmt-based host:port formatting.",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Default GOMAXPROCS becomes container-aware, capping to cgroup CPU bandwidth limits and updating as CPU availability changes unless overridden or disabled by GODEBUG.",
+      "impact": "performance"
+    },
+    {
+      "category": "runtime",
+      "description": "Experimental `greenteagc` garbage collector promises 10–40% lower GC overhead for small-object heavy workloads when enabled via GOEXPERIMENT.",
+      "impact": "new"
+    },
+    {
+      "category": "runtime",
+      "description": "Unhandled panic reports for recovered-and-repanicked values are condensed to a single message indicating the repanic.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "runtime",
+      "description": "Linux runtimes name anonymous VMAs (for example `[anon: Go: heap]`) when the kernel supports CONFIG_ANON_VMA_NAME, controllable via GODEBUG `decoratemappings`.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "compiler",
+      "description": "Compiler and linker now emit DWARF v5 debug info by default, reducing binary debug size and link time with GOEXPERIMENT=nodwarf5 as a temporary opt-out.",
+      "impact": "performance"
+    },
+    {
+      "category": "compiler",
+      "description": "Nil pointer checks occur promptly, so code that uses results before checking errors—such as ignoring a nil `*os.File`—now panics as required by the spec.",
+      "impact": "breaking"
+    },
+    {
+      "category": "compiler",
+      "description": "Slice backing arrays are stack-allocated in more situations, improving performance but exposing latent unsafe.Pointer misuse; tooling and flags exist to bisect or disable the change.",
+      "impact": "performance"
+    },
+    {
+      "category": "linker",
+      "description": "New `-funcalign=N` linker flag lets builds choose a custom function entry alignment per platform defaults.",
+      "impact": "new"
+    },
+    {
+      "category": "standard library",
+      "description": "New `testing/synctest` package introduces controlled bubbles and fake clocks for deterministic concurrency testing.",
+      "impact": "new"
+    },
+    {
+      "category": "standard library",
+      "description": "Experimental `encoding/json/v2` and `encoding/json/jsontext` packages ship behind GOEXPERIMENT=jsonv2, offering faster JSON decoding and richer configuration while leaving encoding/json behavior stable.",
+      "impact": "new"
+    },
+    {
+      "category": "ports",
+      "description": "macOS support now requires Monterey (12) or newer, ending support for earlier releases.",
+      "impact": "breaking"
+    },
+    {
+      "category": "ports",
+      "description": "Go 1.25 is the final release shipping the broken 32-bit windows/arm port ahead of its removal in Go 1.26.",
+      "impact": "deprecation"
+    },
+    {
+      "category": "ports",
+      "description": "linux/loong64 adds race detector support, C traceback collection, and internal-link-mode cgo builds.",
+      "impact": "enhancement"
+    },
+    {
+      "category": "ports",
+      "description": "linux/riscv64 now supports plugin mode and recognizes the `GORISCV64=rva23u64` application profile.",
+      "impact": "enhancement"
+    }
+  ],
+  "packages": {
+    "testing/synctest": [
+      {
+        "description": "Provides bubbles that sandbox concurrent tests with fake clocks and coordinated goroutine blocking.",
+        "impact": "new",
+        "example": "synctest.Test(func(t *synctest.T) { /* deterministic concurrent assertions */ })"
+      },
+      {
+        "function": "Wait",
+        "description": "Blocks until all goroutines in the bubble are waiting, ensuring the test reaches quiescence before assertions.",
+        "impact": "new"
+      }
+    ],
+    "encoding/json/v2": [
+      {
+        "description": "Experimental JSON implementation activated with GOEXPERIMENT=jsonv2, delivering faster decoding and new configuration options.",
+        "impact": "new"
+      },
+      {
+        "package": "encoding/json/jsontext",
+        "description": "Companion low-level package exposes JSON tokenization APIs when the experiment is enabled.",
+        "impact": "new"
+      }
+    ],
+    "encoding/json": [
+      {
+        "description": "Uses the v2 implementation when GOEXPERIMENT=jsonv2 is set, maintaining marshal semantics but changing error text and adding new options.",
+        "impact": "enhancement"
+      }
+    ],
+    "archive/tar": [
+      {
+        "function": "Writer.AddFS",
+        "description": "Now preserves symbolic links for filesystems implementing io/fs.ReadLinkFS.",
+        "impact": "enhancement"
+      }
+    ],
+    "encoding/asn1": [
+      {
+        "function": "Unmarshal",
+        "description": "Parses T61String and BMPString encodings consistently, rejecting malformed inputs previously accepted.",
+        "impact": "breaking"
+      }
+    ],
+    "crypto": [
+      {
+        "type": "MessageSigner",
+        "description": "New interface for signers that hash messages internally, alongside helper `SignMessage` to prefer it when available.",
+        "impact": "new"
+      },
+      {
+        "description": "Changing the `fips140` GODEBUG flag after startup is now ignored instead of panicking, as documented.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "SHA-1, SHA-256, and SHA-512 slow down on amd64 systems lacking AVX2 instructions.",
+        "impact": "performance"
+      }
+    ],
+    "crypto/ecdsa": [
+      {
+        "function": "ParseRawPrivateKey",
+        "description": "Parses raw ECDSA private key bytes without relying on crypto/elliptic helpers.",
+        "impact": "new"
+      },
+      {
+        "function": "ParseUncompressedPublicKey",
+        "description": "Decodes uncompressed ECDSA public keys into usable structures.",
+        "impact": "new"
+      },
+      {
+        "method": "(*PrivateKey).Bytes",
+        "description": "Serializes private keys using low-level encodings.",
+        "impact": "new"
+      },
+      {
+        "method": "(*PublicKey).Bytes",
+        "description": "Serializes public keys without extra elliptic or big.Int helpers.",
+        "impact": "new"
+      },
+      {
+        "description": "FIPS 140-3 mode signing throughput is now on par with non-FIPS operation (4× faster).",
+        "impact": "performance"
+      }
+    ],
+    "crypto/ed25519": [
+      {
+        "description": "FIPS 140-3 signing achieves the same performance as standard mode, yielding roughly 4× speedups.",
+        "impact": "performance"
+      }
+    ],
+    "crypto/elliptic": [
+      {
+        "description": "Undocumented `Inverse` and `CombinedMult` methods have been removed from curve implementations.",
+        "impact": "breaking"
+      }
+    ],
+    "crypto/rsa": [
+      {
+        "description": "Documentation clarifies that RSA public modulus values are public, matching existing Verify warnings.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "RSA key generation completes roughly three times faster.",
+        "impact": "performance"
+      }
+    ],
+    "crypto/sha1": [
+      {
+        "description": "SHA-1 hashing doubles in speed on amd64 when SHA-NI instructions are present.",
+        "impact": "performance"
+      }
+    ],
+    "crypto/sha3": [
+      {
+        "method": "(*SHA3).Clone",
+        "description": "Implements hash.Cloner for duplicating hashing state.",
+        "impact": "new"
+      },
+      {
+        "description": "Hashing throughput doubles on Apple M-series processors.",
+        "impact": "performance"
+      }
+    ],
+    "crypto/tls": [
+      {
+        "field": "ConnectionState.CurveID",
+        "description": "Exposes the key exchange group negotiated for the connection.",
+        "impact": "new"
+      },
+      {
+        "function": "Config.GetEncryptedClientHelloKeys",
+        "description": "Allows servers to supply Encrypted Client Hello keys dynamically.",
+        "impact": "new"
+      },
+      {
+        "description": "SHA-1 signatures are rejected during TLS 1.2 handshakes unless `GODEBUG=tlssha1=1` re-enables them.",
+        "impact": "breaking"
+      },
+      {
+        "description": "In FIPS 140-3 mode, Extended Master Secret becomes mandatory and Ed25519/X25519MLKEM768 are now permitted.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "Servers now prefer the highest mutually supported protocol version and both endpoints enforce stricter spec compliance.",
+        "impact": "enhancement"
+      }
+    ],
+    "crypto/x509": [
+      {
+        "function": "CreateCertificate",
+        "description": "Certificate creation functions accept crypto.MessageSigner implementations for one-shot signing.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "SubjectKeyId defaults to truncated SHA-256 when missing, overridable via GODEBUG `x509sha256skid=0`.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "ParseCertificate rejects BasicConstraints with negative pathLenConstraint values.",
+        "impact": "breaking"
+      },
+      {
+        "description": "ParseCertificate handles T61String and BMPString encodings consistently, potentially rejecting malformed data.",
+        "impact": "breaking"
+      }
+    ],
+    "debug/elf": [
+      {
+        "description": "Adds PT_RISCV_ATTRIBUTES and SHT_RISCV_ATTRIBUTES constants for RISC-V binaries.",
+        "impact": "new"
+      }
+    ],
+    "go/ast": [
+      {
+        "description": "FilterPackage, PackageExports, MergePackageFiles, MergeMode, and related constants are deprecated alongside legacy Object/Package usage.",
+        "impact": "deprecation"
+      },
+      {
+        "function": "PreorderStack",
+        "description": "Traverses syntax trees like Inspect while providing the stack of enclosing nodes for convenience.",
+        "impact": "new"
+      }
+    ],
+    "go/parser": [
+      {
+        "function": "ParseDir",
+        "description": "Deprecated in Go 1.25, reflecting the move away from legacy package inspection APIs.",
+        "impact": "deprecation"
+      }
+    ],
+    "go/token": [
+      {
+        "method": "FileSet.AddExistingFiles",
+        "description": "Allows construction of FileSets from pre-existing Files, easing long-lived tooling scenarios.",
+        "impact": "new"
+      }
+    ],
+    "go/types": [
+      {
+        "method": "(*Var).Kind",
+        "description": "Classifies variables as package-level, receiver, parameter, result, local, or struct field.",
+        "impact": "new"
+      },
+      {
+        "function": "LookupSelection",
+        "description": "Looks up a field or method and returns it as a Selection, complementing LookupFieldOrMethod.",
+        "impact": "new"
+      }
+    ],
+    "hash": [
+      {
+        "interface": "XOF",
+        "description": "Defines extendable-output hash functionality for algorithms such as SHAKE.",
+        "impact": "new"
+      },
+      {
+        "description": "All standard Hash implementations now satisfy hash.Cloner to duplicate state.",
+        "impact": "enhancement"
+      }
+    ],
+    "hash/maphash": [
+      {
+        "method": "(*Hash).Clone",
+        "description": "Implements hash.Cloner for copying random state.",
+        "impact": "new"
+      }
+    ],
+    "io/fs": [
+      {
+        "interface": "ReadLinkFS",
+        "description": "Adds opt-in symlink reading support for virtual filesystems.",
+        "impact": "new"
+      }
+    ],
+    "log/slog": [
+      {
+        "function": "GroupAttrs",
+        "description": "Convenience helper to build a group Attr from a slice of Attrs.",
+        "impact": "new"
+      },
+      {
+        "method": "Record.Source",
+        "description": "Returns the source location associated with a log record when available.",
+        "impact": "new"
+      }
+    ],
+    "mime/multipart": [
+      {
+        "function": "FileContentDisposition",
+        "description": "Constructs Content-Disposition headers for multipart file parts.",
+        "impact": "new"
+      }
+    ],
+    "net": [
+      {
+        "function": "LookupMX",
+        "description": "Returns MX answers that resemble IP addresses instead of discarding them, matching real-world resolver behavior.",
+        "impact": "enhancement"
+      },
+      {
+        "function": "ListenMulticastUDP",
+        "description": "Supports IPv6 multicast addresses on Windows.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "Windows now supports converting between os.File and network connections using FileConn/FilePacketConn/FileListener and related methods.",
+        "impact": "new"
+      }
+    ],
+    "net/http": [
+      {
+        "type": "CrossOriginProtection",
+        "description": "Implements Fetch-metadata-based CSRF mitigation that rejects unsafe cross-origin browser requests with optional bypass rules.",
+        "impact": "new"
+      }
+    ],
+    "os": [
+      {
+        "function": "NewFile",
+        "description": "On Windows, accepts handles opened for asynchronous I/O and associates them with the runtime IOCP so deadlines and nonblocking semantics work.",
+        "impact": "enhancement"
+      },
+      {
+        "description": "DirFS and Root.FS now satisfy io/fs.ReadLinkFS, and CopyFS preserves symlinks when the source implements it.",
+        "impact": "enhancement"
+      },
+      {
+        "type": "Root",
+        "description": "Gains filesystem management helpers including Chmod, Chown, Chtimes, Lchown, Link, MkdirAll, ReadFile, Readlink, RemoveAll, Rename, Symlink, and WriteFile.",
+        "impact": "enhancement"
+      }
+    ],
+    "reflect": [
+      {
+        "function": "TypeAssert",
+        "description": "Converts a reflect.Value directly to a typed Go value without intermediate interface allocations.",
+        "impact": "new"
+      }
+    ],
+    "regexp/syntax": [
+      {
+        "description": "Unicode class escapes now recognize Any, ASCII, Assigned, Cn, LC, and category aliases with case-insensitive, punctuation-agnostic matching per TR18.",
+        "impact": "enhancement"
+      }
+    ],
+    "runtime": [
+      {
+        "function": "AddCleanup",
+        "description": "Cleanup callbacks execute concurrently and in parallel, improving throughput for heavy cleanup workloads.",
+        "impact": "performance"
+      },
+      {
+        "description": "With `GODEBUG=checkfinalizers=1`, the runtime inspects finalizer/cleanup usage each GC and reports queue lengths.",
+        "impact": "new"
+      },
+      {
+        "function": "SetDefaultGOMAXPROCS",
+        "description": "Resets GOMAXPROCS to the runtime default, re-enabling container-aware behavior after manual overrides.",
+        "impact": "new"
+      }
+    ],
+    "runtime/pprof": [
+      {
+        "description": "Mutex profiles now attribute contention on runtime locks to the end of the blocking critical section; the runtimecontentionstacks GODEBUG toggle is removed.",
+        "impact": "enhancement"
+      }
+    ],
+    "runtime/trace": [
+      {
+        "type": "FlightRecorder",
+        "description": "Captures rolling execution traces that can be snapshotted on demand using configurable retention windows.",
+        "impact": "new"
+      }
+    ],
+    "sync": [
+      {
+        "method": "(*WaitGroup).Go",
+        "description": "Launches a goroutine and increments the WaitGroup counter in one step for common patterns.",
+        "impact": "new"
+      }
+    ],
+    "testing": [
+      {
+        "method": "(T|B|F).Attr",
+        "description": "Emits structured key/value attributes into test output.",
+        "impact": "new"
+      },
+      {
+        "method": "(T|B|F).Output",
+        "description": "Provides an io.Writer backed by the test log without file and line prefixes.",
+        "impact": "new"
+      },
+      {
+        "function": "AllocsPerRun",
+        "description": "Now panics if invoked while tests run in parallel, preventing flaky measurements.",
+        "impact": "breaking"
+      }
+    ],
+    "testing/fstest": [
+      {
+        "type": "MapFS",
+        "description": "Implements io/fs.ReadLinkFS for symlink-aware filesystem tests.",
+        "impact": "enhancement"
+      },
+      {
+        "function": "TestFS",
+        "description": "Validates ReadLinkFS behavior and avoids following symlinks to prevent unbounded recursion.",
+        "impact": "enhancement"
+      }
+    ],
+    "unicode": [
+      {
+        "var": "CategoryAliases",
+        "description": "Exposes Unicode category alias names such as Letter for L.",
+        "impact": "new"
+      },
+      {
+        "description": "Adds Cn and LC category tables and folds C to include Cn, covering unassigned code points.",
+        "impact": "enhancement"
+      }
+    ],
+    "unique": [
+      {
+        "description": "Interned values are reclaimed sooner, more efficiently, and in parallel, avoiding memory blow-ups for highly unique data sets.",
+        "impact": "performance"
+      },
+      {
+        "description": "Values containing Handle chains are collected in a single GC cycle once unused instead of requiring multiple collections.",
+        "impact": "performance"
+      }
+    ]
+  }
+}
